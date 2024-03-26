@@ -1,0 +1,1 @@
+export const server = "https://jskw989d-8000.asse.devtunnels.ms/api";
