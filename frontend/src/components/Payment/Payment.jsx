@@ -45,7 +45,7 @@ const Payment = () => {
   };
 
   const order = {
-    cart: orderData?.cart,
+    cart: orderData?.listSelected,
     shippingAddress: orderData?.shippingAddress,
     user: user && user,
     totalPrice: orderData?.totalPrice,
@@ -160,6 +160,8 @@ const Payment = () => {
       localStorage.setItem("cartItems", JSON.stringify([]));
       localStorage.setItem("latestOrder", JSON.stringify([]));
       window.location.reload();
+    }).catch((error) => {
+      toast.error(error);
     });
   };
 
@@ -367,12 +369,12 @@ const CartData = ({ orderData }) => {
     <div className="w-full bg-[#fff] rounded-md p-5 pb-8">
       <div className="flex justify-between">
         <h3 className="text-[16px] font-[400] text-[#000000a4]">subtotal:</h3>
-        <h5 className="text-[18px] font-[600]">${orderData?.subTotalPrice.toLocaleString()}</h5>
+        <h5 className="text-[18px] font-[600]">${orderData?.subTotalPrice?.toLocaleString()}</h5>
       </div>
       <br />
       <div className="flex justify-between">
         <h3 className="text-[16px] font-[400] text-[#000000a4]">shipping:</h3>
-        <h5 className="text-[18px] font-[600]">${shipping.toLocaleString()}</h5>
+        <h5 className="text-[18px] font-[600]">${shipping?.toLocaleString()}</h5>
       </div>
       <br />
       <div className="flex justify-between border-b pb-3">
@@ -380,7 +382,7 @@ const CartData = ({ orderData }) => {
         <h5 className="text-[18px] font-[600]">{orderData?.discountPrice ? "$" + orderData.discountPrice.toLocaleString() : "-"}</h5>
       </div>
       <h5 className="text-[18px] font-[600] text-end pt-3">
-        ${orderData?.totalPrice.toLocaleString()}
+        ${orderData?.totalPrice?.toLocaleString()}
       </h5>
       <br />
     </div>

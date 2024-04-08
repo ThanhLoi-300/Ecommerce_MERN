@@ -24,7 +24,7 @@ const AllProducts = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "Product Id", minWidth: 150, flex: 0.7 },
+    // { field: "id", headerName: "Product Id", minWidth: 150, flex: 0.7 },
     {
       field: "name",
       headerName: "Name",
@@ -97,7 +97,7 @@ const AllProducts = () => {
       row.push({
         id: item._id,
         name: item.name,
-        price: "US$ " + item.discountPrice,
+        price: "$ " + item.originalPrice.toLocaleString(),
         Stock: item.stock,
         sold: item?.sold_out,
       });
@@ -105,13 +105,13 @@ const AllProducts = () => {
 
   return (
     <>
-      {/* {isLoading ? (
+      {isLoading ? (
         <Loader />
-      ) : ( */}
+      ) : (
         <div className="w-full mx-8 pt-1 mt-10 bg-white">
           <DataGrid rows={row} columns={columns} pageSize={10} disableSelectionOnClick autoHeight/>
         </div>
-      {/* )} */}
+      )}
     </>
   );
 };

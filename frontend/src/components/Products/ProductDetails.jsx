@@ -19,9 +19,9 @@ const ProductDetails = ({ data }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   dispatch(getAllProductsShop(data?.shop._id));
-  // }, [data]);
+  useEffect(() => {
+    dispatch(getAllProductsShop(data?.shop._id));
+  }, [data]);
 
   const incrementCount = () => {
     if (count == data.stock) toast.error("Quantity is limited")
@@ -224,7 +224,7 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating,
         <div className="w-full min-h-[40vh] flex flex-col items-center py-3 overflow-y-scroll">
           {data && data.reviews.map((item, index) => (
               <div className="w-full flex my-2">
-                <img src={`${item.user.avatar?.url}`} className="w-[50px] h-[50px] rounded-full"/>
+                <img src={`${item.user.avatar}`} className="w-[50px] h-[50px] rounded-full"/>
                 <div className="pl-2 ">
                   <div className="w-full flex items-center">
                     <h1 className="font-[500] mr-3">{item.user.name}</h1>

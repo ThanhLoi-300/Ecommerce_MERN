@@ -60,7 +60,9 @@ module.exports = {
 
   getInfoShop: async (req, res, next) => {
     try {
+      console.log(req.params.id)
       const shop = await Shop.findById(req.params.id).populate('user');
+      console.log(shop)
       res.status(201).json({
         success: true,
         shop,

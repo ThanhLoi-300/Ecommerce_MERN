@@ -15,6 +15,23 @@ body {
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   background: #F6F6F5;
   scroll-behavior: smooth;
+  overflow-y: scroll;
+  scrollbar-width: thin;
+  scrollbar-color: gray lightgray;
+}
+
+/* Tạo màu sắc cho thanh cuộn */
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: lightgray;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: gray;
+  border-radius: 4px;
 }
 
 input,

@@ -84,7 +84,7 @@ const ShopProfileData = ({ isOwner }) => {
         <div className="w-full">
           {allReviews && allReviews.map((item, index) => (
               <div className="w-full flex my-4">
-                <img src={`${item.user.avatar?.url}`} className="w-[50px] h-[50px] rounded-full"/>
+                <img src={`${item.user.avatar}`} className="w-[50px] h-[50px] rounded-full"/>
                 <div className="pl-2">
                   <div className="flex w-full items-center">
                     <h1 className="font-[600] pr-2">{item.user.name}</h1>

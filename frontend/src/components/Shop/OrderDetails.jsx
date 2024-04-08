@@ -18,7 +18,7 @@ const OrderDetails = () => {
   const { id } = useParams();
 
   useEffect(() => {
-    dispatch(getAllOrdersOfShop(seller._id));
+    dispatch(getAllOrdersOfShop(seller?._id));
   }, [dispatch]);
 
   const data = orders && orders.find((item) => item._id === id);
@@ -42,21 +42,21 @@ const OrderDetails = () => {
   };
 
   const refundOrderUpdateHandler = async (e) => {
-    await axios
-    .put(
-      `${server}/order/order-refund-success/${id}`,
-      {
-        status,
-      },
-      { withCredentials: true }
-    )
-    .then((res) => {
-      toast.success("Order updated!");
-      dispatch(getAllOrdersOfShop(seller._id));
-    })
-    .catch((error) => {
-      toast.error(error.response.data.message);
-    });
+    // await axios
+    // .put(
+    //   `${server}/order/order-refund-success/${id}`,
+    //   {
+    //     status,
+    //   },
+    //   { withCredentials: true }
+    // )
+    // .then((res) => {
+    //   toast.success("Order updated!");
+    //   dispatch(getAllOrdersOfShop(seller._id));
+    // })
+    // .catch((error) => {
+    //   toast.error(error.response.data.message);
+    // });
   }
 
   console.log(data?.status);
@@ -94,14 +94,14 @@ const OrderDetails = () => {
         data?.cart.map((item, index) => (
           <div className="w-full flex items-start mb-5">
             <img
-              src={`${item.images[0]?.url}`}
+              src={`${item.product.images[0]}`}
               alt=""
               className="w-[80x] h-[80px]"
             />
             <div className="w-full">
-              <h5 className="pl-3 text-[20px]">{item.name}</h5>
+              <h5 className="pl-3 text-[20px]">{item.product.name}</h5>
               <h5 className="pl-3 text-[20px] text-[#00000091]">
-                US${item.discountPrice} x {item.qty}
+                ${item.product.originalPrice.toLocaleString()} x {item.quantity}
               </h5>
             </div>
           </div>
@@ -109,7 +109,7 @@ const OrderDetails = () => {
 
       <div className="border-t w-full text-right">
         <h5 className="pt-3 text-[18px]">
-          Total Price: <strong>US${data?.totalPrice}</strong>
+          Total Price: <strong>${data?.totalPrice.toLocaleString()}</strong>
         </h5>
       </div>
       <br />

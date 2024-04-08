@@ -8,6 +8,7 @@ import {
   FAQPage,
   HomePage,
   LoginPage,
+  OrderDetailsPage,
   OrderSuccessPage,
   PaymentPage,
   ProductDetailsPage,
@@ -17,6 +18,8 @@ import {
   ShopCreatePage,
   ShopHomePage,
   SignupPage,
+  TrackOrderPage,
+  UserInbox,
 } from "./routes/Routes";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -25,7 +28,16 @@ import { loadSeller, loadUser } from "./redux/actions/user";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import SellerProtectedRoute from "./routes/SellerProtectedRoute";
 import ShopDashboardPage from "./pages/Shop/ShopDashboardPage";
-import { ShopAllCoupouns, ShopAllEvents, ShopAllOrders, ShopCreateEvents, ShopCreateProduct, ShopOrderDetails, ShopPreviewPage } from "./routes/ShopRoutes";
+import {
+  ShopAllCoupouns,
+  ShopAllEvents,
+  ShopAllOrders,
+  ShopCreateEvents,
+  ShopCreateProduct,
+  ShopInboxPage,
+  ShopOrderDetails,
+  ShopPreviewPage,
+} from "./routes/ShopRoutes";
 import ShopAllProducts from "./pages/Shop/ShopAllProducts";
 import { getAllProducts } from "./redux/actions/product";
 import { getAllEvents } from "./redux/actions/event";
@@ -53,7 +65,8 @@ const App = () => {
       {stripeApikey && (
         <Elements stripe={loadStripe(stripeApikey)}>
           <Routes>
-            <Route path="/payment"
+            <Route
+              path="/payment"
               element={
                 <ProtectedRoute>
                   <PaymentPage />
@@ -67,8 +80,14 @@ const App = () => {
         <Route path="/" element={<HomePage />}></Route>
         <Route path="/login" element={<LoginPage />}></Route>
         <Route path="/sign-up" element={<SignupPage />}></Route>
-        <Route path="/activation/:activation_token" element={<ActivationPage />}></Route>
-        <Route path="/seller/activation/:activation_token" element={<SellerActivationPage />} ></Route>
+        <Route
+          path="/activation/:activation_token"
+          element={<ActivationPage />}
+        ></Route>
+        <Route
+          path="/seller/activation/:activation_token"
+          element={<SellerActivationPage />}
+        ></Route>
         <Route path="/products" element={<ProductsPage />}></Route>
         <Route path="/product/:id" element={<ProductDetailsPage />}></Route>
         <Route path="/best-selling" element={<BestSellingPage />}></Route>
@@ -79,9 +98,9 @@ const App = () => {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            <ProfilePage />
+            // </ProtectedRoute>
           }
         ></Route>
         <Route path="/shop-create" element={<ShopCreatePage />}></Route>
@@ -150,6 +169,16 @@ const App = () => {
             </SellerProtectedRoute>
           }
         />
+
+        <Route
+          path="/dashboard-messages"
+          element={
+            <SellerProtectedRoute>
+              <ShopInboxPage />
+            </SellerProtectedRoute>
+          }
+        />
+
         <Route
           path="/order/:id"
           element={
@@ -158,6 +187,30 @@ const App = () => {
             </SellerProtectedRoute>
           }
         />
+
+        <Route
+          path="/user/order/:id"
+          element={
+            <OrderDetailsPage />
+          }
+        />
+
+        <Route
+          path="/user/track/order/:id"
+          element={
+            <TrackOrderPage />
+          }
+        />
+
+        <Route
+          path="/inbox"
+          element={
+            <ProtectedRoute>
+              <UserInbox />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
       <ToastContainer
         position="bottom-center"

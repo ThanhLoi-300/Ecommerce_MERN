@@ -24,7 +24,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import Input from "../Inputs/Input";
 import { deleteImage, uploadFile } from "../../utils/uploadFile";
-// import { getAllOrdersOfUser } from "../../redux/actions/order";
+import { getAllOrdersOfUser } from "../../redux/actions/order";
 
 const ProfileContent = ({ active }) => {
   const { user, error, successMessage } = useSelector((state) => state.user);
@@ -35,6 +35,7 @@ const ProfileContent = ({ active }) => {
 
   useEffect(() => {
     if (error) {
+      console.log(error);
       toast.error(error);
       dispatch({ type: "clearErrors" });
     }
@@ -208,12 +209,11 @@ const ProfileContent = ({ active }) => {
 
 const AllOrders = () => {
   const { user } = useSelector((state) => state.user);
-  //   const { orders } = useSelector((state) => state.order);
-  const orders = [];
+  const { orders } = useSelector((state) => state.order);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    //dispatch(getAllOrdersOfUser(user._id));
+    dispatch(getAllOrdersOfUser(user._id));
   }, []);
 
   const columns = [
@@ -274,7 +274,7 @@ const AllOrders = () => {
       row.push({
         id: item._id,
         itemsQty: item.cart.length,
-        total: "US$ " + item.totalPrice,
+        total: "$ " + item.totalPrice.toLocaleString(),
         status: item.status,
       });
     });
@@ -294,12 +294,11 @@ const AllOrders = () => {
 
 const AllRefundOrders = () => {
   const { user } = useSelector((state) => state.user);
-  //   const { orders } = useSelector((state) => state.order);
-  const orders = [];
+  const { orders } = useSelector((state) => state.order);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    //dispatch(getAllOrdersOfUser(user._id));
+    dispatch(getAllOrdersOfUser(user._id));
   }, []);
 
   const eligibleOrders =
@@ -363,7 +362,7 @@ const AllRefundOrders = () => {
       row.push({
         id: item._id,
         itemsQty: item.cart.length,
-        total: "US$ " + item.totalPrice,
+        total: "$ " + item.totalPrice.toLocaleString(),
         status: item.status,
       });
     });
@@ -383,12 +382,11 @@ const AllRefundOrders = () => {
 
 const TrackOrder = () => {
   const { user } = useSelector((state) => state.user);
-  //   const { orders } = useSelector((state) => state.order);
-  const orders = [];
+  const { orders } = useSelector((state) => state.order);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    //dispatch(getAllOrdersOfUser(user._id));
+    dispatch(getAllOrdersOfUser(user._id));
   }, []);
 
   const columns = [
@@ -449,7 +447,7 @@ const TrackOrder = () => {
       row.push({
         id: item._id,
         itemsQty: item.cart.length,
-        total: "US$ " + item.totalPrice,
+        total: "$ " + item.totalPrice.toLocaleString(),
         status: item.status,
       });
     });

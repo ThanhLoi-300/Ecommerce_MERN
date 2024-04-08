@@ -64,7 +64,7 @@ module.exports = {
   getSellerAllOrder: async (req, res, next) => {
     try {
       const orders = await Order.find({
-        "cart.shopId": req.params.shopId,
+        "cart.product.shop": req.params.shopId,
       }).sort({
         createdAt: -1,
       });
@@ -87,7 +87,7 @@ module.exports = {
       }
       if (req.body.status === "Transferred to delivery partner") {
         order.cart.forEach(async (o) => {
-          await updateOrder(o._id, o.qty);
+          await updateOrder(o.product._id, o.quantity);
         });
       }
 
@@ -112,7 +112,6 @@ module.exports = {
 
         product.stock -= qty;
         product.sold_out += qty;
-
         await product.save({ validateBeforeSave: false });
       }
 

@@ -3,7 +3,7 @@ const { isSeller, isAuthenticated, isAdmin } = require("../middleware/auth");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const router = express.Router();
 const Product = require("../model/product");
-// const Order = require("../model/order");
+const Order = require("../model/order");
 const Shop = require("../model/shop");
 const cloudinary = require("cloudinary");
 const ErrorHandler = require("../utils/ErrorHandler");
@@ -30,7 +30,7 @@ module.exports = {
 
   getAllProductByShopId: async (req, res, next) => {
     try {
-      const products = await Product.find({ shop: req.params.id }).populate('shop');
+      const products = await Product.find({ shop: req.params.id }).populate('shop').populate('reviews.user');
       
       res.status(201).json({
         success: true,
@@ -73,7 +73,7 @@ module.exports = {
           path: 'user',
           model: 'User'
         }
-      });
+      }).populate('reviews.user');
 
       res.status(201).json({
         success: true,
@@ -132,6 +132,7 @@ module.exports = {
         message: "Reviwed succesfully!",
       });
     } catch (error) {
+      console.log(error)
       return next(new ErrorHandler(error, 400));
     }
   },

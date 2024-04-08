@@ -84,7 +84,7 @@ module.exports = {
   loginUser: async (req, res, next) => {
     try {
       const { email, password } = req.body;
-
+      console.log(JSON.stringify(req.body))
       const user = await User.findOne({ email: email }).select("+password");
 
       if (!user) return next(new ErrorHandler("User doesn't exists!", 400));
@@ -181,7 +181,8 @@ module.exports = {
 
   updateUerInfo: async (req, res, next) => {
     try {
-      const { phoneNumber, name } = req.body;
+      const { phoneNumber, name, email } = req.body;
+      console.log(req.body)
 
       const user = await User.findOne({ email }).select("+password");
 

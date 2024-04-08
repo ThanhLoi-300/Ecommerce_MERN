@@ -49,7 +49,7 @@ export const updateUserInformation =
           },
         }
       );
-
+      
       dispatch(updateUserInfoSuccess(data.user));
     } catch (error) {
       dispatch(updateUserInfoFailed(error.response.data.message));

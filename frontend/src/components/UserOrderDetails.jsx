@@ -22,8 +22,8 @@ const UserOrderDetails = () => {
   const { id } = useParams();
 
   useEffect(() => {
-    dispatch(getAllOrdersOfUser(user._id));
-  }, [dispatch,user._id]);
+    dispatch(getAllOrdersOfUser(user?._id));
+  }, [dispatch,user?._id]);
 
   const data = orders && orders.find((item) => item._id === id);
 
@@ -35,7 +35,7 @@ const UserOrderDetails = () => {
           user,
           rating,
           comment,
-          productId: selectedItem?._id,
+          productId: selectedItem?.product._id,
           orderId: id,
         },
         { withCredentials: true }
@@ -89,14 +89,14 @@ const UserOrderDetails = () => {
           return(
           <div className="w-full flex items-start mb-5">
             <img
-              src={`${item.images[0]?.url}`}
+              src={`${item.product.images[0]}`}
               alt=""
               className="w-[80x] h-[80px]"
             />
             <div className="w-full">
-              <h5 className="pl-3 text-[20px]">{item.name}</h5>
+              <h5 className="pl-3 text-[20px]">{item.product.name}</h5>
               <h5 className="pl-3 text-[20px] text-[#00000091]">
-                US${item.discountPrice} x {item.qty}
+                US ${item.product.originalPrice.toLocaleString()} x {item.quantity}
               </h5>
             </div>
             {!item.isReviewed && data?.status === "Delivered" ?  <div
@@ -104,9 +104,7 @@ const UserOrderDetails = () => {
                 onClick={() => setOpen(true) || setSelectedItem(item)}
               >
                 Write a review
-              </div> : (
-             null
-            )}
+              </div> : ( null )}
           </div>
           )
          })}
@@ -128,14 +126,14 @@ const UserOrderDetails = () => {
             <br />
             <div className="w-full flex">
               <img
-                src={`${selectedItem?.images[0]?.url}`}
+                src={`${selectedItem?.product.images[0]}`}
                 alt=""
                 className="w-[80px] h-[80px]"
               />
               <div>
-                <div className="pl-3 text-[20px]">{selectedItem?.name}</div>
+                <div className="pl-3 text-[20px]">{selectedItem?.product.name}</div>
                 <h4 className="pl-3 text-[20px]">
-                  US${selectedItem?.discountPrice} x {selectedItem?.qty}
+                  ${selectedItem?.product.originalPrice.toLocaleString()} x {selectedItem?.quantity}
                 </h4>
               </div>
             </div>
@@ -199,7 +197,7 @@ const UserOrderDetails = () => {
 
       <div className="border-t w-full text-right">
         <h5 className="pt-3 text-[18px]">
-          Total Price: <strong>US${data?.totalPrice}</strong>
+          Total Price: <strong>${data?.totalPrice.toLocaleString()}</strong>
         </h5>
       </div>
       <br />
@@ -207,20 +205,18 @@ const UserOrderDetails = () => {
       <div className="w-full 800px:flex items-center">
         <div className="w-full 800px:w-[60%]">
           <h4 className="pt-3 text-[20px] font-[600]">Shipping Address:</h4>
-          <h4 className="pt-3 text-[20px]">
-            {data?.shippingAddress.address1 +
-              " " +
+          <h4 className="pt-3 text-[20px]">Address: {data?.shippingAddress.address1 +
+              ", " +
               data?.shippingAddress.address2}
           </h4>
-          <h4 className=" text-[20px]">{data?.shippingAddress.country}</h4>
-          <h4 className=" text-[20px]">{data?.shippingAddress.city}</h4>
-          <h4 className=" text-[20px]">{data?.user?.phoneNumber}</h4>
+          <h4 className=" text-[20px]">Country: {data?.shippingAddress.country}</h4>
+          <h4 className=" text-[20px]">City: {data?.shippingAddress.city}</h4>
+          <h4 className=" text-[20px]">Phone: 0{data?.user?.phoneNumber}</h4>
         </div>
         <div className="w-full 800px:w-[40%]">
           <h4 className="pt-3 text-[20px]">Payment Info:</h4>
           <h4>
-            Status:{" "}
-            {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
+            Status: {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
           </h4>
           <br />
            {

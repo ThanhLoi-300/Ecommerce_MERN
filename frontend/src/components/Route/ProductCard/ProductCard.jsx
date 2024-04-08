@@ -61,11 +61,11 @@ const ProductCard = ({ data,isEvent }) => {
               <h5 className={`${styles.productDiscountPrice}`}>
                 {data.discount === 0 ? data.originalPrice.toLocaleString() : data.discountPrice.toLocaleString()} VND
               </h5>
-              <h4 className={`${styles.price}`}>
+              {/* <h4 className={`${styles.price}`}>
                 {data.originalPrice ? data.originalPrice.toLocaleString() + " VND" : null}
-              </h4>
+              </h4> */}
             </div>
-            <span className="font-[400] text-[17px] text-[#68d284]">
+            <span className="font-[400] text-[14px] text-[#68d284]">
               {data?.sold_out} sold
             </span>
           </div>
