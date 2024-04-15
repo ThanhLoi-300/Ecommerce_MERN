@@ -5,7 +5,7 @@ const initialState = {
 };
 
 const eventSlice = createSlice({
-  name: "product",
+  name: "event",
   initialState: initialState,
   reducers: {
     eventCreateRequest: (state) => {
@@ -29,6 +29,7 @@ const eventSlice = createSlice({
     getAlleventsShopSuccess: (state, action) => {
       state.isLoading = false;
       state.events = action.payload;
+      console.log("action.payload"+ JSON.stringify(state.events));
     },
     getAlleventsShopFailed: (state, action) => {
       state.isLoading = false;
@@ -67,6 +68,6 @@ const eventSlice = createSlice({
   },
 });
 
-export const { actions, reducer: eventReducer } = eventSlice;
+export const { getAlleventsShopRequest, deleteeventRequest, getAlleventsShopSuccess  } = eventSlice;
 
-export default eventReducer;
+export const eventReducer = eventSlice.reducer;

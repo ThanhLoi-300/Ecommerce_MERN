@@ -19,7 +19,7 @@ const routes = (app) => {
     app.use('/api/order', OrderRouter)
     app.use('/api/conversation', ConversationRouter)
     app.use('/api/message', MessageRouter)
-    app.use('/api/message', DiscountRouter)
+    app.use('/api/discount', DiscountRouter)
 }
 
 module.exports = routes

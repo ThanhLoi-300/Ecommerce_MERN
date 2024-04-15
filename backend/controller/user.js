@@ -9,7 +9,7 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
 const sendToken = require("../utils/jwtToken");
-const { isAuthenticated, isAdmin } = require("../middleware/auth");
+const { isAuthenticated } = require("../middleware/auth");
 
 module.exports = {
   createUser: async (req, res, next) => {
@@ -356,56 +356,3 @@ module.exports = {
 const createActivationToken = (user) => {
   return jwt.sign(user, process.env.ACTIVATION_SECRET, { expiresIn: "5m" });
 };
-
-// all users --- for admin
-router.get(
-  "/admin-all-users",
-  isAuthenticated,
-  isAdmin("Admin"),
-  catchAsyncErrors(async (req, res, next) => {
-    try {
-      const users = await User.find().sort({
-        createdAt: -1,
-      });
-      res.status(201).json({
-        success: true,
-        users,
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  })
-);
-
-// delete users --- admin
-router.delete(
-  "/delete-user/:id",
-  isAuthenticated,
-  isAdmin("Admin"),
-  catchAsyncErrors(async (req, res, next) => {
-    try {
-      const user = await User.findById(req.params.id);
-
-      if (!user) {
-        return next(
-          new ErrorHandler("User is not available with this id", 400)
-        );
-      }
-
-      const imageId = user.avatar.public_id;
-
-      await cloudinary.v2.uploader.destroy(imageId);
-
-      await User.findByIdAndDelete(req.params.id);
-
-      res.status(201).json({
-        success: true,
-        message: "User deleted successfully!",
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  })
-);
-
-//module.exports = router;

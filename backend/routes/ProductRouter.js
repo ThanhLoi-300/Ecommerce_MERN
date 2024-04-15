@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const productController = require("../controller/product");
-const { isSeller, isAuthenticated, isAdmin } = require("../middleware/auth");
+const { isSeller, isAuthenticated } = require("../middleware/auth");
 
 // create product
 router.post("/create-product", isSeller, productController.createProduct);

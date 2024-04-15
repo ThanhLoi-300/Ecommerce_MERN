@@ -39,7 +39,6 @@ import {
 } from "./routes/ShopRoutes";
 import ShopAllProducts from "./pages/Shop/ShopAllProducts";
 import { getAllProducts } from "./redux/actions/product";
-import { getAllEvents } from "./redux/actions/event";
 import axios from "axios";
 import { server } from "./server";
 import { Elements } from "@stripe/react-stripe-js";
@@ -56,7 +55,6 @@ const App = () => {
     Store.dispatch(loadUser());
     Store.dispatch(loadSeller());
     Store.dispatch(getAllProducts());
-    Store.dispatch(getAllEvents());
     getStripeApikey();
   }, []);
   return (

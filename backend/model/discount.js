@@ -9,7 +9,7 @@ const discountSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
   }],
-  status: { type: Boolean, }
+  status: { type: Boolean, default: false, },
 });
 
 module.exports = mongoose.model("Discount", discountSchema);
