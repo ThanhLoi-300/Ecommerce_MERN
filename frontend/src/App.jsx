@@ -5,7 +5,6 @@ import {
   BestSellingPage,
   CheckoutPage,
   EventsPage,
-  FAQPage,
   HomePage,
   LoginPage,
   OrderDetailsPage,
@@ -92,7 +91,6 @@ const App = () => {
         <Route path="/product/:id" element={<ProductDetailsPage />}></Route>
         <Route path="/best-selling" element={<BestSellingPage />}></Route>
         <Route path="/events" element={<EventsPage />}></Route>
-        <Route path="/faq" element={<FAQPage />}></Route>
         <Route path="/checkout" element={<CheckoutPage />}></Route>
         <Route path="/orer/success" element={<OrderSuccessPage />}></Route>
         <Route
@@ -205,9 +203,9 @@ const App = () => {
         <Route
           path="/inbox"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <UserInbox />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
 

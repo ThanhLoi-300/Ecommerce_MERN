@@ -125,6 +125,7 @@ const Cart = ({ setOpenCart }) => {
 };
 
 const CartSingle = ({ data, quantityChangeHandler, removeFromCartHandler, quantity, handleCheckboxChange, checkItemSelected}) => {
+  const navigate = useNavigate();
   const [value, setValue] = useState(quantity);
   const totalPrice = data.product.originalPrice * value;
 
@@ -148,7 +149,7 @@ const CartSingle = ({ data, quantityChangeHandler, removeFromCartHandler, quanti
       <div className="w-full flex items-center">
         <input type="checkbox" className="mr-4" onChange={() =>handleCheckboxChange(data)}  />
         <div>
-          <div className={`bg-[#e44343] border border-[#e4434373] rounded-full w-[25px] h-[25px] ${styles.noramlFlex} justify-center cursor-pointer`}
+          <div className={`bg-[rgb(228,67,67)] border border-[#e4434373] rounded-full w-[25px] h-[25px] ${styles.noramlFlex} justify-center cursor-pointer`}
             onClick={() => increment(data.product)}
           >
             <HiPlus size={18} color="#fff" />
@@ -160,7 +161,7 @@ const CartSingle = ({ data, quantityChangeHandler, removeFromCartHandler, quanti
             <HiOutlineMinus size={16} color="#7d879c" />
           </div>
         </div>
-        <img src={`${data?.product.images[0]}`} className="w-[130px] h-min ml-2 mr-2 rounded-[5px]"/>
+        <img src={`${data?.product.images[0]}`} onClick={()=> navigate(`/product/${data.product._id}`)} className="w-[130px] cursor-pointer h-min ml-2 mr-2 rounded-[5px]"/>
         <div className="pl-[5px]">
           <h1>{data.product.name.length > 40 ? data.product.name.slice(0, 40) + "..." : data.product.name}</h1>
           <h4 className="font-[400] text-[15px] text-[#00000082]">

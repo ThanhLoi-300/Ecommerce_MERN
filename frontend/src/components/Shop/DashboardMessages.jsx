@@ -8,12 +8,13 @@ import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
 import styles from "../../styles/styles";
 import { TfiGallery } from "react-icons/tfi";
 import socketIO from "socket.io-client";
+import { uploadFile } from "../../utils/uploadFile";
 // import { format } from "timeago.js";
 const ENDPOINT = "http://localhost:4000/";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const DashboardMessages = () => {
-  const { seller,isLoading } = useSelector((state) => state.seller);
+  const { seller, isLoading } = useSelector((state) => state.seller);
   const [conversations, setConversations] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const [currentChat, setCurrentChat] = useState();
@@ -37,8 +38,11 @@ const DashboardMessages = () => {
   }, []);
 
   useEffect(() => {
+    console.log(
+      "arrivalMessage.sender: " + JSON.stringify(arrivalMessage?.sender)
+    );
     arrivalMessage &&
-      currentChat?.members.includes(arrivalMessage.sender) &&
+      currentChat?.user === arrivalMessage?.sender &&
       setMessages((prev) => [...prev, arrivalMessage]);
   }, [arrivalMessage, currentChat]);
 
@@ -71,8 +75,8 @@ const DashboardMessages = () => {
   }, [seller]);
 
   const onlineCheck = (chat) => {
-    const chatMembers = chat.members.find((member) => member !== seller?._id);
-    const online = onlineUsers.find((user) => user.userId === chatMembers);
+    const user = chat.user;
+    const online = onlineUsers.find((user) => user.userId === user);
 
     return online ? true : false;
   };
@@ -102,9 +106,8 @@ const DashboardMessages = () => {
       conversationId: currentChat._id,
     };
 
-    const receiverId = currentChat.members.find(
-      (member) => member.id !== seller._id
-    );
+    const receiverId =
+      seller._id !== currentChat.user ? currentChat.user : currentChat.shop;
 
     socketId.emit("sendMessage", {
       senderId: seller._id,
@@ -147,48 +150,6 @@ const DashboardMessages = () => {
       .catch((error) => {
         console.log(error);
       });
-  };
-
-  const handleImageUpload = async (e) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (reader.readyState === 2) {
-        setImages(reader.result);
-        imageSendingHandler(reader.result);
-      }
-    };
-
-    reader.readAsDataURL(e.target.files[0]);
-  };
-
-  const imageSendingHandler = async (e) => {
-    const receiverId = currentChat.members.find(
-      (member) => member !== seller._id
-    );
-
-    socketId.emit("sendMessage", {
-      senderId: seller._id,
-      receiverId,
-      images: e,
-    });
-
-    try {
-      await axios
-        .post(`${server}/message/create-new-message`, {
-          images: e,
-          sender: seller._id,
-          text: newMessage,
-          conversationId: currentChat._id,
-        })
-        .then((res) => {
-          setImages();
-          setMessages([...messages, res.data.message]);
-          updateLastMessageForImage();
-        });
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const updateLastMessageForImage = async () => {
@@ -244,7 +205,6 @@ const DashboardMessages = () => {
           activeStatus={activeStatus}
           scrollRef={scrollRef}
           setMessages={setMessages}
-          handleImageUpload={handleImageUpload}
         />
       )}
     </div>
@@ -260,9 +220,8 @@ const MessageList = ({
   setUserData,
   online,
   setActiveStatus,
-  isLoading
+  isLoading,
 }) => {
-  console.log(data);
   const [user, setUser] = useState([]);
   const navigate = useNavigate();
   const handleClick = (id) => {
@@ -272,12 +231,12 @@ const MessageList = ({
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const userId = data.members.find((user) => user != me);
-
+    const userId = data.user;
     const getUser = async () => {
       try {
         const res = await axios.get(`${server}/user/user-info/${userId}`);
         setUser(res.data.user);
+        console.log("check user: " + JSON.stringify(user));
       } catch (error) {
         console.log(error);
       }
@@ -300,7 +259,7 @@ const MessageList = ({
     >
       <div className="relative">
         <img
-          src={`${user?.avatar?.url}`}
+          src={`${user?.avatar}`}
           alt=""
           className="w-[50px] h-[50px] rounded-full"
         />
@@ -313,9 +272,9 @@ const MessageList = ({
       <div className="pl-3">
         <h1 className="text-[18px]">{user?.name}</h1>
         <p className="text-[16px] text-[#000c]">
-          {!isLoading && data?.lastMessageId !== user?._id
+          {!isLoading && data?.lastMessageId === me
             ? "You:"
-            : user?.name.split(" ")[0] + ": "}{" "}
+            : user?.name + ": "}{" "}
           {data?.lastMessage}
         </p>
       </div>
@@ -333,15 +292,60 @@ const SellerInbox = ({
   sellerId,
   userData,
   activeStatus,
-  handleImageUpload,
 }) => {
+  const handleImageUpload = async (e) => {
+    console.log("a");
+    try {
+      const reader = new FileReader();
+      console.log("abc");
+      reader.onload = () => {
+        if (reader.readyState === 2) {
+          console.log(e);
+          setImages(reader.result);
+          imageSendingHandler(reader.result);
+        }
+      };
+
+      reader.readAsDataURL(e.target.files[0]);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const imageSendingHandler = async (e) => {
+    const receiverId = currentChat.user;
+    const img = await uploadFile(e);
+    console.log(img);
+    // socketId.emit("sendMessage", {
+    //   senderId: seller._id,
+    //   receiverId,
+    //   images: img,
+    // });
+
+    try {
+      // await axios
+      //   .post(`${server}/message/create-new-message`, {
+      //     images: e,
+      //     sender: seller._id,
+      //     text: newMessage,
+      //     conversationId: currentChat._id,
+      //   })
+      //   .then((res) => {
+      //     setImages();
+      //     setMessages([...messages, res.data.message]);
+      //     updateLastMessageForImage();
+      //   });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="w-full min-h-full flex flex-col justify-between">
       {/* message header */}
       <div className="w-full flex p-3 items-center justify-between bg-slate-200">
         <div className="flex">
           <img
-            src={`${userData?.avatar?.url}`}
+            src={`${userData?.avatar}`}
             alt=""
             className="w-[60px] h-[60px] rounded-full"
           />
@@ -361,6 +365,9 @@ const SellerInbox = ({
       <div className="px-3 h-[65vh] py-3 overflow-y-scroll">
         {messages &&
           messages.map((item, index) => {
+            let check = false;
+            if (messages[index]?.sender === messages[index + 1]?.sender)
+              check = true;
             return (
               <div
                 className={`flex w-full my-2 ${
@@ -370,8 +377,8 @@ const SellerInbox = ({
               >
                 {item.sender !== sellerId && (
                   <img
-                    src={`${userData?.avatar?.url}`}
-                    className="w-[40px] h-[40px] rounded-full mr-3"
+                    src={`${userData?.avatar}`}
+                    className={`w-[40px] h-[40px] rounded-full mr-3 `}
                     alt=""
                   />
                 )}

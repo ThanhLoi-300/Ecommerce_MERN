@@ -1,24 +1,13 @@
 const Messages = require("../model/messages");
+const Conversation = require("../model/conversation");
 const ErrorHandler = require("../utils/ErrorHandler");
-const catchAsyncErrors = require("../middleware/catchAsyncErrors");
-const express = require("express");
-const cloudinary = require("cloudinary");
-const router = express.Router();
 
 module.exports = {
-    createMessage: async (req, res, next) => {
+  createMessage: async (req, res, next) => {
     try {
       const messageData = req.body;
 
-      if (req.body.images) {
-        const myCloud = await cloudinary.v2.uploader.upload(req.body.images, {
-          folder: "messages",
-        });
-        messageData.images = {
-          public_id: myCloud.public_id,
-          url: myCloud.url,
-        };
-      }
+      if (req.body.images) messageData.images = req.body.images;
 
       messageData.conversationId = req.body.conversationId;
       messageData.sender = req.body.sender;
@@ -33,6 +22,11 @@ module.exports = {
 
       await message.save();
 
+      const conversation = await Conversation.findByIdAndUpdate(req.body.conversationId, {
+        lastMessage: messageData.text,
+        //lastMessageId,
+      });
+
       res.status(201).json({
         success: true,
         message,
@@ -40,9 +34,9 @@ module.exports = {
     } catch (error) {
       return next(new ErrorHandler(error.message), 500);
     }
-    },
-    
-    getAllMessages: async (req, res, next) => {
+  },
+
+  getAllMessages: async (req, res, next) => {
     try {
       const messages = await Messages.find({
         conversationId: req.params.id,
@@ -55,7 +49,6 @@ module.exports = {
     } catch (error) {
       return next(new ErrorHandler(error.message), 500);
     }
-  }
-}
+  },
+};
 
-//module.exports = router;

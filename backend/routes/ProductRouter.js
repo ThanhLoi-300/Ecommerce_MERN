@@ -12,7 +12,5 @@ router.delete("/delete-shop-product/:id", isSeller, productController.delete);
 router.get("/get-all-products", productController.getAllProducts);
 // review for a product
 router.put("/create-new-review", isAuthenticated, productController.createNewReview);
-// all products --- for admin
-router.get("/admin-all-products", isAuthenticated, isAdmin("Admin"), productController.adminAllProduct);
 
 module.exports = router;

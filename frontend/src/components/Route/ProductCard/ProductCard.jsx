@@ -40,8 +40,8 @@ const ProductCard = ({ data,isEvent }) => {
   return (
     <>
       <div className="w-full h-[370px] bg-white rounded-lg shadow-sm p-3 relative cursor-pointer">
-        <div className="flex justify-end"></div>
-        <Link to={`${isEvent === true ? `/product/${data._id}?isEvent=true` : `/product/${data._id}`}`}>
+        <div className="flex items-center justify-center absolute w-12 h-12 rounded-full bg-yellow-500 right-4">-30%</div>
+        <Link to={`${isEvent === true ? `/product/${data?._id}?isEvent=true` : `/product/${data._id}`}`}>
           <img src={`${data.images && data.images[0]}`} className="w-full h-[170px] object-contain"/>
         </Link>
         <Link to={`/shop/preview/${data?.shop._id}`}>
@@ -59,7 +59,7 @@ const ProductCard = ({ data,isEvent }) => {
           <div className="py-2 flex items-center justify-between">
             <div className="flex flex-col">
               <h5 className={`${styles.productDiscountPrice}`}>
-                {data.discount === 0 ? data.originalPrice.toLocaleString() : data.discountPrice.toLocaleString()} VND
+                {data.discount === undefined ? data.originalPrice.toLocaleString() : data.discountPrice.toLocaleString()} VND
               </h5>
               {/* <h4 className={`${styles.price}`}>
                 {data.originalPrice ? data.originalPrice.toLocaleString() + " VND" : null}

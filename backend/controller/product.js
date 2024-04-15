@@ -1,11 +1,7 @@
 const express = require("express");
-const { isSeller, isAuthenticated, isAdmin } = require("../middleware/auth");
-const catchAsyncErrors = require("../middleware/catchAsyncErrors");
-const router = express.Router();
 const Product = require("../model/product");
 const Order = require("../model/order");
 const Shop = require("../model/shop");
-const cloudinary = require("cloudinary");
 const ErrorHandler = require("../utils/ErrorHandler");
 
 module.exports = {
@@ -30,7 +26,13 @@ module.exports = {
 
   getAllProductByShopId: async (req, res, next) => {
     try {
-      const products = await Product.find({ shop: req.params.id }).populate('shop').populate('reviews.user');
+      const products = await Product.find({ shop: req.params.id }).populate('shop').populate('reviews.user').populate('discount').populate({
+        path: 'shop',
+        populate: {
+          path: 'user',
+          model: 'User'
+        }
+      });
       
       res.status(201).json({
         success: true,
@@ -47,12 +49,6 @@ module.exports = {
 
       if (!product)
         return next(new ErrorHandler("Product is not found with this id", 404));
-
-      for (let i = 0; 1 < product.images.length; i++) {
-        const result = await cloudinary.v2.uploader.destroy(
-          product.images[i].public_id
-        );
-      }
 
       await product.remove();
 
@@ -73,7 +69,7 @@ module.exports = {
           path: 'user',
           model: 'User'
         }
-      }).populate('reviews.user');
+      }).populate('reviews.user').populate('discount');
 
       res.status(201).json({
         success: true,
@@ -136,18 +132,4 @@ module.exports = {
       return next(new ErrorHandler(error, 400));
     }
   },
-
-  adminAllProduct: async (req, res, next) => {
-    try {
-      const products = await Product.find().sort({
-        createdAt: -1,
-      });
-      res.status(201).json({
-        success: true,
-        products,
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  }
 };

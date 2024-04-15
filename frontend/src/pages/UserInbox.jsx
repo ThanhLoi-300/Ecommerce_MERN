@@ -38,7 +38,7 @@ const UserInbox = () => {
 
   useEffect(() => {
     arrivalMessage &&
-      currentChat?.members.includes(arrivalMessage.sender) &&
+      currentChat?.shop === arrivalMessage.sender &&
       setMessages((prev) => [...prev, arrivalMessage]);
   }, [arrivalMessage, currentChat]);
 
@@ -101,9 +101,7 @@ const UserInbox = () => {
       text: newMessage,
       conversationId: currentChat._id,
     };
-    const receiverId = currentChat.members.find(
-      (member) => member !== user?._id
-    );
+    const receiverId = user?._id !== currentChat.shop ? currentChat.shop : currentChat.user
 
     socketId.emit("sendMessage", {
       senderId: user?._id,
@@ -266,7 +264,7 @@ const MessageList = ({
   loading
 }) => {
   const [active, setActive] = useState(0);
-  const [user, setUser] = useState([]);
+  const [userShop, setUserShop] = useState([]);
   const navigate = useNavigate();
   const handleClick = (id) => {
     navigate(`/inbox?${id}`);
@@ -276,12 +274,12 @@ const MessageList = ({
   useEffect(() => {
     setActiveStatus(online);
     const userId = data.shop;
-    console.log("userData "+userData)
+    console.log("userData "+JSON.stringify(userData))
     const getUser = async () => {
       try {
         const res = await axios.get(`${server}/shop/get-shop-info/${userId}`);
-        setUser(res.data.shop);
-        console.log("user: "+user)
+        setUserShop(res.data.shop);
+        console.log("user: "+JSON.stringify(userShop))
       } catch (error) {
         console.log(error);
       }
@@ -298,13 +296,13 @@ const MessageList = ({
         setActive(index) ||
         handleClick(data._id) ||
         setCurrentChat(data) ||
-        setUserData(user) ||
+        setUserData(userShop) ||
         setActiveStatus(online)
       }
     >
       <div className="relative">
         <img
-          src={`${user?.user.avatar}`}
+          src={`${userShop?.user?.avatar}`}
           alt=""
           className="w-[50px] h-[50px] rounded-full"
         />
@@ -315,11 +313,11 @@ const MessageList = ({
         )}
       </div>
       <div className="pl-3">
-        <h1 className="text-[18px]">{user?.nameShop}</h1>
+        <h1 className="text-[18px]">{userShop?.nameShop}</h1>
         <p className="text-[16px] text-[#000c]">
-          {!loading && data?.lastMessageId !== userData?._id
+          {!loading && data?.lastMessageId === me
             ? "You:"
-            : userData?.name.split(" ")[0] + ": "}{" "}
+            : userShop?.nameShop?.split(" ")[0] + ": "}{" "}
           {data?.lastMessage}
         </p>
       </div>
@@ -339,18 +337,18 @@ const SellerInbox = ({
   scrollRef,
   handleImageUpload,
 }) => {
+  console.log("shop: "+JSON.stringify(userData))
   return (
     <div className="w-[full] min-h-full flex flex-col justify-between p-5">
       {/* message header */}
       <div className="w-full flex p-3 items-center justify-between bg-slate-200">
         <div className="flex">
           <img
-            src={`${userData?.avatar}`}
-            alt=""
+            src={`${userData?.user?.avatar}`}
             className="w-[60px] h-[60px] rounded-full"
           />
           <div className="pl-3">
-            <h1 className="text-[18px] font-[600]">{userData?.name}</h1>
+            <h1 className="text-[18px] font-[600]">{userData?.nameShop}</h1>
             <h1>{activeStatus ? "Active Now" : ""}</h1>
           </div>
         </div>
@@ -373,7 +371,7 @@ const SellerInbox = ({
             >
               {item.sender !== sellerId && (
                 <img
-                  src={`${userData?.avatar?.url}`}
+                  src={`${userData?.user.avatar}`}
                   className="w-[40px] h-[40px] rounded-full mr-3"
                   alt=""
                 />

@@ -41,9 +41,7 @@ module.exports = {
     getSellerConversation: async (req, res, next) => {
         try {
             const conversations = await Conversation.find({
-                members: {
-                    $in: [req.params.id],
-                },
+                shop: req.params.id,
             }).sort({ updatedAt: -1, createdAt: -1 });
 
             res.status(201).json({
