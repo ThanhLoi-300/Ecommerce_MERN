@@ -145,29 +145,35 @@ module.exports = {
 
 const checkUpdateDiscount = async () => {
   const currentDate = new Date();
+  let discounts = await Discount.find()
 
-  await Discount.updateMany(
-    {
-      $and: [
-        { startDate: { $lte: currentDate } },
-        { endDate: { $gte: currentDate } },
-      ],
-      status: false
-    },
-    { $set: { status: true } }
-  );
+  discounts.forEach(async item => {
+    if (item.startDay <= currentDate && item.endDay >= currentDate && !item.status) {
+      d = await Discount.findByIdAndUpdate(
+        item._id,
+        {
+          status: true,
+        },
+        { new: true }
+      );
+      // console.log("d"+d)
+    }
+  });
 
-  await Discount.updateMany(
-    {
-      $or: [
-        { startDate: { $gt: currentDate } },
-        { endDate: { $lt: currentDate } },
-      ],
-      status: true
-    },
-    { $set: { status: false } }
-  );
+  discounts.forEach(async item => {
+    if (!(item.startDay <= currentDate && item.endDay >= currentDate) && item.status) {
+      a=await Discount.findByIdAndUpdate(
+        item._id,
+        {
+          status: false,
+        },
+        { new: true }
+      );
+      // console.log("a"+a)
+    }
+  });
 
-  console.log("ok");
+  // console.log(discounts);
 };
+
 setInterval(checkUpdateDiscount, 60000);

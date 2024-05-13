@@ -3,17 +3,19 @@ import Header from "../components/Layout/Header";
 import { useSelector } from "react-redux";
 import socketIO from "socket.io-client";
 // import { format } from "timeago.js";
+import { format } from "date-fns";
 import { server } from "../server";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
 import { TfiGallery } from "react-icons/tfi";
 import styles from "../styles/styles";
+import { uploadFile } from "../utils/uploadFile";
 const ENDPOINT = "http://localhost:4000/";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const UserInbox = () => {
-  const { user,loading } = useSelector((state) => state.user);
+  const { user, loading } = useSelector((state) => state.user);
   const [conversations, setConversations] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const [currentChat, setCurrentChat] = useState();
@@ -101,7 +103,8 @@ const UserInbox = () => {
       text: newMessage,
       conversationId: currentChat._id,
     };
-    const receiverId = user?._id !== currentChat.shop ? currentChat.shop : currentChat.user
+    const receiverId =
+      user?._id !== currentChat.shop ? currentChat.shop : currentChat.user;
 
     socketId.emit("sendMessage", {
       senderId: user?._id,
@@ -151,7 +154,7 @@ const UserInbox = () => {
     reader.onload = () => {
       if (reader.readyState === 2) {
         setImages(reader.result);
-        imageSendingHandler(reader.result);
+        imageSendingHandler(e.target.files[0]);
       }
     };
 
@@ -159,28 +162,23 @@ const UserInbox = () => {
   };
 
   const imageSendingHandler = async (e) => {
-
-    const receiverId = currentChat.members.find(
-      (member) => member !== user._id
-    );
+    const receiverId = currentChat.shop;
+    const url = await uploadFile(e);
 
     socketId.emit("sendMessage", {
       senderId: user._id,
       receiverId,
-      images: e,
+      images: url,
     });
 
     try {
       await axios
-        .post(
-          `${server}/message/create-new-message`,
-          {
-            images: e,
-            sender: user._id,
-            text: newMessage,
-            conversationId: currentChat._id,
-          }
-        )
+        .post(`${server}/message/create-new-message`, {
+          images: url,
+          sender: user._id,
+          text: newMessage,
+          conversationId: currentChat._id,
+        })
         .then((res) => {
           setImages();
           setMessages([...messages, res.data.message]);
@@ -261,7 +259,7 @@ const MessageList = ({
   userData,
   online,
   setActiveStatus,
-  loading
+  loading,
 }) => {
   const [active, setActive] = useState(0);
   const [userShop, setUserShop] = useState([]);
@@ -274,12 +272,12 @@ const MessageList = ({
   useEffect(() => {
     setActiveStatus(online);
     const userId = data.shop;
-    console.log("userData "+JSON.stringify(userData))
+    console.log("userData " + JSON.stringify(userData));
     const getUser = async () => {
       try {
         const res = await axios.get(`${server}/shop/get-shop-info/${userId}`);
         setUserShop(res.data.shop);
-        console.log("user: "+JSON.stringify(userShop))
+        console.log("user: " + JSON.stringify(userShop));
       } catch (error) {
         console.log(error);
       }
@@ -337,7 +335,7 @@ const SellerInbox = ({
   scrollRef,
   handleImageUpload,
 }) => {
-  console.log("shop: "+JSON.stringify(userData))
+  console.log("shop: " + JSON.stringify(userData));
   return (
     <div className="w-[full] min-h-full flex flex-col justify-between p-5">
       {/* message header */}
@@ -377,24 +375,28 @@ const SellerInbox = ({
                 />
               )}
               {item.images && (
-                <img
-                  src={`${item.images?.url}`}
-                  className="w-[300px] h-[300px] object-cover rounded-[10px] ml-2 mb-2"
-                />
+                <div className="flex flex-col">
+                  <img
+                    src={`${item.images}`}
+                    className="w-[300px] h-[300px] object-cover rounded-[10px] ml-2 mb-2"
+                  />
+                  <p className="text-[12px] text-[#000000d3] pt-1 flex ml-auto">
+                    {format(new Date(item.createdAt), "yyyy-MM-dd HH:mm:ss")}
+                  </p>
+                </div>
               )}
               {item.text !== "" && (
                 <div>
                   <div
                     className={`w-max p-2 rounded ${
-                      item.sender === sellerId ? "bg-[#000]" : "bg-[#38c776]"
+                      item.sender === sellerId ? "bg-[#000] flex ml-auto" : "bg-[#38c776]"
                     } text-[#fff] h-min`}
                   >
                     <p>{item.text}</p>
                   </div>
 
                   <p className="text-[12px] text-[#000000d3] pt-1">
-                    {/* {format(item.createdAt)} */}
-                    {item.createdAt}
+                    {format(new Date(item.createdAt), "yyyy-MM-dd HH:mm:ss")}
                   </p>
                 </div>
               )}

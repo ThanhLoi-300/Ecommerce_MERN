@@ -10,7 +10,7 @@ const Product = require("../model/product");
 module.exports = {
   createOrder: async (req, res, next) => {
     try {
-      const { cart, shippingAddress, user, totalPrice, paymentInfo } = req.body;
+      const { cart, shippingAddress, user, totalPrice, paymentInfo, discountPrice } = req.body;
 
       //   group cart items by shopId
       const shopItemsMap = new Map();
@@ -33,6 +33,7 @@ module.exports = {
           user,
           totalPrice,
           paymentInfo,
+          discountPrice
         });
         orders.push(order);
       }
@@ -42,6 +43,7 @@ module.exports = {
         orders,
       });
     } catch (error) {
+      consolelog(error)
       return next(new ErrorHandler(error.message, 500));
     }
   },
@@ -85,7 +87,7 @@ module.exports = {
       if (!order) {
         return next(new ErrorHandler("Order not found with this id", 400));
       }
-      if (req.body.status === "Transferred to delivery partner") {
+      if (req.body.status === "Shipping") {
         order.cart.forEach(async (o) => {
           await updateOrder(o.product._id, o.quantity);
         });
@@ -93,7 +95,8 @@ module.exports = {
 
       order.status = req.body.status;
 
-      if (req.body.status === "Delivered") {
+      if (req.body.status === "Received") {
+        order.status = "Delivered";
         order.deliveredAt = Date.now();
         order.paymentInfo.status = "Succeeded";
         const serviceCharge = order.totalPrice * 0.1;
@@ -116,9 +119,10 @@ module.exports = {
       }
 
       async function updateSellerInfo(amount) {
-        const seller = await Shop.findById(req.seller.id);
+        var id = req.seller?.id ? req.seller.id : req.body.idSeller
+        const seller = await Shop.findById(id);
 
-        seller.availableBalance = amount;
+        seller.availableBalance += amount;
 
         await seller.save();
       }

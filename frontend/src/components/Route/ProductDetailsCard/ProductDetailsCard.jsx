@@ -9,6 +9,7 @@ import { addToCart } from "../../../redux/reducers/user";
 import axios from "axios";
 import { loadUser } from "../../../redux/actions/user";
 import { server } from "../../../server";
+import CountdownTimer from "../../timer/CountdownTimer";
 
 const ProductDetailsCard = ({ setOpen, data }) => {
   const { cart } = useSelector((state) => state.user);
@@ -17,6 +18,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
   const [count, setCount] = useState(1);
   const [click, setClick] = useState(false);
   const [select, setSelect] = useState(false);
+  const { products } = useSelector((state) => state.products);
 
   const handleMessageSubmit = () => { };
   console.log(data)
@@ -43,6 +45,22 @@ const ProductDetailsCard = ({ setOpen, data }) => {
     }
   };
 
+  const totalReviewsLength =
+    products &&
+    products.reduce((acc, product) => acc + product.reviews?.length, 0);
+
+  const totalRatings =
+    products &&
+    products.reduce(
+      (acc, product) =>
+        acc + product.reviews?.reduce((sum, review) => sum + review.rating, 0),
+      0
+    );
+
+  const avg = totalRatings / totalReviewsLength || 0;
+
+  const averageRating = avg.toFixed(2);
+
   return (
     <div className="bg-[#fff]">
       {data && (
@@ -60,7 +78,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
                       <h3 className={`${styles.shop_name}`}>
                         {data.shop.nameShop}
                       </h3>
-                      <h5 className="pb-3 text-[15px]">{data?.ratings ? data.ratings : 0} Ratings</h5>
+                      <h5 className="pb-3 text-[15px]">({averageRating}/5) Ratings</h5>
                     </div>
                   </Link>
                 </div>
@@ -85,13 +103,31 @@ const ProductDetailsCard = ({ setOpen, data }) => {
                 </div>
 
                 <div className="flex pt-3">
-                  <h4 className={`${styles.productDiscountPrice}`}>
-                    {data.discountPrice}$
-                  </h4>
-                  <h3 className={`${styles.price}`}>
-                    {data.originalPrice ? data.originalPrice.toLocaleString() + "VND" : null}
-                  </h3>
+                  {data.discount && data.discount.status ? (
+                    <>
+                      <h4 className={`${styles.productDiscountPrice}`}>
+                        {(
+                          data.originalPrice -
+                          (data.originalPrice * data.discount.percent) / 100
+                        ).toLocaleString()}{" "}
+                        VND
+                      </h4>
+                      <h3 className={`${styles.price}`}>
+                        {data.originalPrice &&
+                          data.originalPrice.toLocaleString() + " VND"}
+                      </h3>
+                    </>
+                  ) : (
+                    <h4 className={`${styles.productDiscountPrice}`}>
+                      {data.originalPrice.toLocaleString() + " VND"}
+                    </h4>
+                  )}
                 </div>
+                {
+                  data.discount && (
+                    <CountdownTimer startDay={data.discount.startDay} endDay={data.discount.endDay}/>
+                  )
+                }
                 <div className="flex items-center mt-12 justify-between pr-3">
                   <div>
                     <button onClick={decrementCount}

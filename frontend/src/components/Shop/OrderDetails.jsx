@@ -57,10 +57,9 @@ const OrderDetails = () => {
     // .catch((error) => {
     //   toast.error(error.response.data.message);
     // });
-  }
+  };
 
   console.log(data?.status);
-
 
   return (
     <div className={`py-4 min-h-screen ${styles.section}`}>
@@ -93,23 +92,49 @@ const OrderDetails = () => {
       {data &&
         data?.cart.map((item, index) => (
           <div className="w-full flex items-start mb-5">
-            <img
-              src={`${item.product.images[0]}`}
-              alt=""
-              className="w-[80x] h-[80px]"
-            />
+            <div>
+              {item.discount && (
+                <div className="flex items-center justify-center absolute w-12 h-12 rounded-full bg-yellow-500 ml-16">
+                  -{item.discount}%
+                </div>
+              )}
+              <img
+                src={`${item.product.images[0]}`}
+                alt=""
+                className="w-[80x] h-[80px]"
+              />
+            </div>
             <div className="w-full">
               <h5 className="pl-3 text-[20px]">{item.product.name}</h5>
               <h5 className="pl-3 text-[20px] text-[#00000091]">
-                ${item.product.originalPrice.toLocaleString()} x {item.quantity}
+                {item.discount ? (
+                  <>
+                    {(
+                      item.product.originalPrice -
+                      (item.product.originalPrice * item.discount) / 100
+                    ).toLocaleString()}
+                    VND * {item.quantity}
+                    <p className={`${styles.price}`}>
+                      {item.product.originalPrice.toLocaleString() + " VND"}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    {item.product.originalPrice.toLocaleString()}VND x{" "}
+                    {item.quantity}
+                  </>
+                )}
               </h5>
             </div>
           </div>
         ))}
 
       <div className="border-t w-full text-right">
+        {data.discountPrice != 0 && (
+          <>Discount Price: -{data.discountPrice.toLocaleString()} VND</>
+        )}
         <h5 className="pt-3 text-[18px]">
-          Total Price: <strong>${data?.totalPrice.toLocaleString()}</strong>
+          Total Price: <strong>{data?.totalPrice.toLocaleString()} VND</strong>
         </h5>
       </div>
       <br />
@@ -137,29 +162,50 @@ const OrderDetails = () => {
       <br />
       <br />
       <h4 className="pt-3 text-[20px] font-[600]">Order Status:</h4>
-      {data?.status !== "Processing refund" && data?.status !== "Refund Success" && (
+      {data?.status !== "Processing refund" &&
+      data?.status !== "Delivered" &&
+      data?.status !== "Shipping" &&
+      data?.status !== "Refund Success" ? (
+        <>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
+          >
+            {["Processing", "Shipping", "Received"]
+              .slice(
+                ["Processing", "Shipping", "Received"].indexOf(data?.status)
+              )
+              .map((option, index) => (
+                <option value={option} key={index}>
+                  {option}
+                </option>
+              ))}
+          </select>
+          <div
+            className={`${styles.button} mt-5 !bg-[#FCE1E6] !rounded-[4px] text-[#E94560] font-[600] !h-[45px] text-[18px]`}
+            onClick={
+              data?.status !== "Processing refund"
+                ? orderUpdateHandler
+                : refundOrderUpdateHandler
+            }
+          >
+            Update Status
+          </div>
+        </>
+      ) : (
+        data?.status
+      )}
+      {data?.status === "Processing refund" ||
+      data?.status === "Refund Success" ? (
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
         >
-          {[
-            "Processing",
-            "Transferred to delivery partner",
-            "Shipping",
-            "Received",
-            "On the way",
-            "Delivered",
-          ]
+          {["Processing refund", "Refund Success"]
             .slice(
-              [
-                "Processing",
-                "Transferred to delivery partner",
-                "Shipping",
-                "Received",
-                "On the way",
-                "Delivered",
-              ].indexOf(data?.status)
+              ["Processing refund", "Refund Success"].indexOf(data?.status)
             )
             .map((option, index) => (
               <option value={option} key={index}>
@@ -167,38 +213,7 @@ const OrderDetails = () => {
               </option>
             ))}
         </select>
-      )}
-      {
-        data?.status === "Processing refund" || data?.status === "Refund Success" ? (
-          <select value={status} 
-       onChange={(e) => setStatus(e.target.value)}
-       className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
-      >
-        {[
-            "Processing refund",
-            "Refund Success",
-          ]
-            .slice(
-              [
-                "Processing refund",
-                "Refund Success",
-              ].indexOf(data?.status)
-            )
-            .map((option, index) => (
-              <option value={option} key={index}>
-                {option}
-              </option>
-            ))}
-      </select>
-        ) : null
-      }
-
-      <div
-        className={`${styles.button} mt-5 !bg-[#FCE1E6] !rounded-[4px] text-[#E94560] font-[600] !h-[45px] text-[18px]`}
-        onClick={data?.status !== "Processing refund" ? orderUpdateHandler : refundOrderUpdateHandler}
-      >
-        Update Status
-      </div>
+      ) : null}
     </div>
   );
 };

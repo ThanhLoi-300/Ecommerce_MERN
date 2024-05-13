@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BsFillBagFill } from "react-icons/bs";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "../styles/styles";
 import { getAllOrdersOfUser } from "../redux/actions/order";
@@ -18,12 +18,14 @@ const UserOrderDetails = () => {
   const [comment, setComment] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
   const [rating, setRating] = useState(1);
+  const [status, setStatus] = useState("");
+  const navigate = useNavigate();
 
   const { id } = useParams();
 
   useEffect(() => {
     dispatch(getAllOrdersOfUser(user?._id));
-  }, [dispatch,user?._id]);
+  }, [dispatch, user?._id]);
 
   const data = orders && orders.find((item) => item._id === id);
 
@@ -51,16 +53,38 @@ const UserOrderDetails = () => {
         toast.error(error);
       });
   };
-  
+
   const refundHandler = async () => {
-    await axios.put(`${server}/order/order-refund/${id}`,{
-      status: "Processing refund"
-    }).then((res) => {
-       toast.success(res.data.message);
-    dispatch(getAllOrdersOfUser(user._id));
-    }).catch((error) => {
-      toast.error(error.response.data.message);
-    })
+    await axios
+      .put(`${server}/order/order-refund/${id}`, {
+        status: "Processing refund",
+      })
+      .then((res) => {
+        toast.success(res.data.message);
+        dispatch(getAllOrdersOfUser(user._id));
+      })
+      .catch((error) => {
+        toast.error(error.response.data.message);
+      });
+  };
+
+  const orderUpdateHandler = async (e) => {
+    await axios
+      .put(
+        `${server}/order/update-order-status/${id}`,
+        {
+          status,
+          idSeller: data?.cart[0]?.product.shop,
+        },
+        { withCredentials: true }
+      )
+      .then((res) => {
+        toast.success("Order updated!");
+        navigate("/profile");
+      })
+      .catch((error) => {
+        toast.error(error.response.data.message);
+      });
   };
 
   return (
@@ -86,28 +110,54 @@ const UserOrderDetails = () => {
       <br />
       {data &&
         data?.cart.map((item, index) => {
-          return(
-          <div className="w-full flex items-start mb-5">
-            <img
-              src={`${item.product.images[0]}`}
-              alt=""
-              className="w-[80x] h-[80px]"
-            />
-            <div className="w-full">
-              <h5 className="pl-3 text-[20px]">{item.product.name}</h5>
-              <h5 className="pl-3 text-[20px] text-[#00000091]">
-                US ${item.product.originalPrice.toLocaleString()} x {item.quantity}
-              </h5>
+          return (
+            <div className="w-full flex items-start mb-5">
+              <div>
+                {item.discount && (
+                  <div className="flex items-center justify-center absolute w-12 h-12 rounded-full bg-yellow-500 ml-16">
+                    -{item.discount}%
+                  </div>
+                )}
+                <img
+                  src={`${item.product.images[0]}`}
+                  alt=""
+                  className="w-[80x] h-[80px]"
+                />
+              </div>
+
+              <div className="w-full">
+                <h5 className="pl-3 text-[20px]">{item.product.name}</h5>
+                <h5 className="pl-3 text-[20px] text-[#00000091]">
+                  {item.discount ? (
+                    <>
+                      {(
+                        item.product.originalPrice -
+                        (item.product.originalPrice * item.discount) / 100
+                      ).toLocaleString()}
+                      VND * {item.quantity}
+                      <p className={`${styles.price}`}>
+                        {item.product.originalPrice.toLocaleString() + " VND"}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      {item.product.originalPrice.toLocaleString()}VND x{" "}
+                      {item.quantity}
+                    </>
+                  )}
+                </h5>
+              </div>
+              {!item.isReviewed && data?.status === "Delivered" ? (
+                <div
+                  className={`${styles.button} text-[#fff]`}
+                  onClick={() => setOpen(true) || setSelectedItem(item)}
+                >
+                  Write a review
+                </div>
+              ) : null}
             </div>
-            {!item.isReviewed && data?.status === "Delivered" ?  <div
-                className={`${styles.button} text-[#fff]`}
-                onClick={() => setOpen(true) || setSelectedItem(item)}
-              >
-                Write a review
-              </div> : ( null )}
-          </div>
-          )
-         })}
+          );
+        })}
 
       {/* review popup */}
       {open && (
@@ -131,9 +181,12 @@ const UserOrderDetails = () => {
                 className="w-[80px] h-[80px]"
               />
               <div>
-                <div className="pl-3 text-[20px]">{selectedItem?.product.name}</div>
+                <div className="pl-3 text-[20px]">
+                  {selectedItem?.product.name}
+                </div>
                 <h4 className="pl-3 text-[20px]">
-                  ${selectedItem?.product.originalPrice.toLocaleString()} x {selectedItem?.quantity}
+                  ${selectedItem?.product.originalPrice.toLocaleString()} x{" "}
+                  {selectedItem?.quantity}
                 </h4>
               </div>
             </div>
@@ -196,8 +249,11 @@ const UserOrderDetails = () => {
       )}
 
       <div className="border-t w-full text-right">
+        {data.discountPrice != 0 && (
+          <>Discount Price: -{data?.discountPrice?.toLocaleString()} VND</>
+        )}
         <h5 className="pt-3 text-[18px]">
-          Total Price: <strong>${data?.totalPrice.toLocaleString()}</strong>
+          Total Price: <strong>{data?.totalPrice.toLocaleString()} VND</strong>
         </h5>
       </div>
       <br />
@@ -205,29 +261,63 @@ const UserOrderDetails = () => {
       <div className="w-full 800px:flex items-center">
         <div className="w-full 800px:w-[60%]">
           <h4 className="pt-3 text-[20px] font-[600]">Shipping Address:</h4>
-          <h4 className="pt-3 text-[20px]">Address: {data?.shippingAddress.address1 +
+          <h4 className="pt-3 text-[20px]">
+            Address:{" "}
+            {data?.shippingAddress.address1 +
               ", " +
               data?.shippingAddress.address2}
           </h4>
-          <h4 className=" text-[20px]">Country: {data?.shippingAddress.country}</h4>
+          <h4 className=" text-[20px]">
+            Country: {data?.shippingAddress.country}
+          </h4>
           <h4 className=" text-[20px]">City: {data?.shippingAddress.city}</h4>
           <h4 className=" text-[20px]">Phone: 0{data?.user?.phoneNumber}</h4>
         </div>
         <div className="w-full 800px:w-[40%]">
           <h4 className="pt-3 text-[20px]">Payment Info:</h4>
           <h4>
-            Status: {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
+            Status:{" "}
+            {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
           </h4>
           <br />
-           {
-            data?.status === "Delivered" && (
-              <div className={`${styles.button} text-white`}
+          {/* {data?.status === "Delivered" && (
+            <div
+              className={`${styles.button} text-white`}
               onClick={refundHandler}
-              >Give a Refund</div>
-            )
-           }
+            >
+              Give a Refund
+            </div>
+          )} */}
         </div>
       </div>
+      <h4 className="pt-3 text-[20px] font-[600]">Order Status:</h4>
+      {data?.status !== "Processing refund" &&
+        data?.status !== "Delivered" && data?.status !== "Processing" &&
+        data?.status !== "Refund Success" ? (
+          <>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
+            >
+              {["Processing", "Shipping", "Received"]
+                .slice(
+                  ["Processing", "Shipping", "Received"].indexOf(data?.status)
+                )
+                .map((option, index) => (
+                  <option value={option} key={index}>
+                    {option}
+                  </option>
+                ))}
+            </select>
+            <div
+              className={`${styles.button} mt-5 !bg-[#FCE1E6] !rounded-[4px] text-[#E94560] font-[600] !h-[45px] text-[18px]`}
+              onClick={orderUpdateHandler}
+            >
+              Update Status
+            </div>
+          </>
+        ): data?.status}
       <br />
       <Link to="/">
         <div className={`${styles.button} text-white`}>Send Message</div>

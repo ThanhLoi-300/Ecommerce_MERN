@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { AiFillHeart, AiOutlineHeart, AiOutlineMessage, AiOutlineShoppingCart,} from "react-icons/ai";
+import {
+  AiFillHeart,
+  AiOutlineHeart,
+  AiOutlineMessage,
+  AiOutlineShoppingCart,
+} from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { getAllProductsShop } from "../../redux/actions/product";
@@ -10,6 +15,7 @@ import Ratings from "./Ratings";
 import axios from "axios";
 import { addToCart } from "../../redux/reducers/user";
 import { loadUser } from "../../redux/actions/user";
+import CountdownTimer from "../timer/CountdownTimer";
 
 const ProductDetails = ({ data }) => {
   const { user, isAuthenticated, cart } = useSelector((state) => state.user);
@@ -24,7 +30,7 @@ const ProductDetails = ({ data }) => {
   }, [data]);
 
   const incrementCount = () => {
-    if (count == data.stock) toast.error("Quantity is limited")
+    if (count == data.stock) toast.error("Quantity is limited");
     else setCount(count + 1);
   };
 
@@ -44,32 +50,40 @@ const ProductDetails = ({ data }) => {
       } else {
         const cartData = { ...data, quantity: count };
         dispatch(addToCart(cartData));
-        await axios.post(`${server}/user/add-cart`, { product: data._id, quantity: count }, { withCredentials: true });
+        await axios.post(
+          `${server}/user/add-cart`,
+          { product: data._id, quantity: count },
+          { withCredentials: true }
+        );
         toast.success("Item added to cart successfully!");
-        dispatch(loadUser())
+        dispatch(loadUser());
       }
     }
   };
 
-  const totalReviewsLength = products && products.reduce((acc, product) => acc + product.reviews?.length, 0);
+  const totalReviewsLength =
+    products &&
+    products.reduce((acc, product) => acc + product.reviews?.length, 0);
 
-  const totalRatings = products && products.reduce(
+  const totalRatings =
+    products &&
+    products.reduce(
       (acc, product) =>
         acc + product.reviews?.reduce((sum, review) => sum + review.rating, 0),
       0
     );
 
-  const avg =  totalRatings / totalReviewsLength || 0;
+  const avg = totalRatings / totalReviewsLength || 0;
 
   const averageRating = avg.toFixed(2);
-
 
   const handleMessageSubmit = async () => {
     if (isAuthenticated) {
       const groupTitle = data._id + user._id;
       const userId = user._id;
       const sellerId = data.shop._id;
-      await axios.post(`${server}/conversation/create-new-conversation`, {
+      await axios
+        .post(`${server}/conversation/create-new-conversation`, {
           groupTitle,
           userId,
           sellerId,
@@ -92,14 +106,28 @@ const ProductDetails = ({ data }) => {
           <div className="w-full py-5">
             <div className="block w-full 800px:flex">
               <div className="w-full 800px:w-[50%]">
-                <img src={`${data && data.images[select]}`} className="w-[80%]" />
+                {data.discount && data.discount.status && (
+                  <div className="flex items-center justify-center absolute w-12 h-12 rounded-full bg-yellow-500 ml-96 mt-4">
+                    -{data.discount.percent}%
+                  </div>
+                )}
+                <img
+                  src={`${data && data.images[select]}`}
+                  className="w-[80%]"
+                />
                 <div className="overflow-x-auto w-[80%] mt-2 custom-dashboard">
                   <div className="flex space-x-3">
-                    {data && data.images.map((i, index) => (
-                      <div key={index} className="flex-shrink-0">
-                        <img src={i} alt={`Image ${index}`} className="h-[200px] w-[100px] object-cover" onClick={() => setSelect(index)} />
-                      </div>
-                    ))}
+                    {data &&
+                      data.images.map((i, index) => (
+                        <div key={index} className="flex-shrink-0">
+                          <img
+                            src={i}
+                            alt={`Image ${index}`}
+                            className="h-[200px] w-[100px] object-cover"
+                            onClick={() => setSelect(index)}
+                          />
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -107,17 +135,36 @@ const ProductDetails = ({ data }) => {
                 <h1 className={`${styles.productTitle}`}>{data.name}</h1>
                 <p className="text-justify">{data.description}</p>
                 <div className="flex pt-3">
-                  <h4 className={`${styles.productDiscountPrice}`}>
-                    {data.discountPrice}$
-                  </h4>
-                  <h3 className={`${styles.price}`}>
-                    {data.originalPrice ? data.originalPrice.toLocaleString() + "VND" : null}
-                  </h3>
+                  {data.discount && data.discount.status ? (
+                    <>
+                      <h4 className={`${styles.productDiscountPrice}`}>
+                        {(
+                          data.originalPrice -
+                          (data.originalPrice * data.discount.percent) / 100
+                        ).toLocaleString()}{" "}
+                        VND
+                      </h4>
+                      <h3 className={`${styles.price}`}>
+                        {data.originalPrice &&
+                          data.originalPrice.toLocaleString() + " VND"}
+                      </h3>
+                    </>
+                  ) : (
+                    <h4 className={`${styles.productDiscountPrice}`}>
+                      {data.originalPrice.toLocaleString() + " VND"}
+                    </h4>
+                  )}
                 </div>
+                {
+                  data.discount && (
+                    <CountdownTimer startDay={data.discount.startDay} endDay={data.discount.endDay}/>
+                  )
+                }
 
                 <div className="flex items-center mt-12 justify-between pr-3">
                   <div>
-                    <button className="bg-gradient-to-r from-teal-400 to-teal-500 text-white font-bold rounded-l px-4 py-2 shadow-lg hover:opacity-75 transition duration-300 ease-in-out"
+                    <button
+                      className="bg-gradient-to-r from-teal-400 to-teal-500 text-white font-bold rounded-l px-4 py-2 shadow-lg hover:opacity-75 transition duration-300 ease-in-out"
                       onClick={decrementCount}
                     >
                       -
@@ -125,14 +172,16 @@ const ProductDetails = ({ data }) => {
                     <span className="bg-gray-200 text-gray-800 font-medium px-4 py-[11px]">
                       {count}
                     </span>
-                    <button className="bg-gradient-to-r from-teal-400 to-teal-500 text-white font-bold rounded-l px-4 py-2 shadow-lg hover:opacity-75 transition duration-300 ease-in-out"
+                    <button
+                      className="bg-gradient-to-r from-teal-400 to-teal-500 text-white font-bold rounded-l px-4 py-2 shadow-lg hover:opacity-75 transition duration-300 ease-in-out"
                       onClick={incrementCount}
                     >
                       +
                     </button>
                   </div>
                 </div>
-                <div className={`${styles.button} !mt-6 !rounded !h-11 flex items-center`}
+                <div
+                  className={`${styles.button} !mt-6 !rounded !h-11 flex items-center`}
                   onClick={() => addToCartHandler(data._id)}
                 >
                   <span className="text-white flex items-center">
@@ -141,7 +190,10 @@ const ProductDetails = ({ data }) => {
                 </div>
                 <div className="flex items-center pt-8">
                   <Link to={`/shop/preview/${data?.shop._id}`}>
-                    <img src={`${data?.shop?.user.avatar}`} className="w-[50px] h-[50px] rounded-full mr-2"/>
+                    <img
+                      src={`${data?.shop?.user.avatar}`}
+                      className="w-[50px] h-[50px] rounded-full mr-2"
+                    />
                   </Link>
                   <div className="pr-8">
                     <Link to={`/shop/preview/${data?.shop._id}`}>
@@ -153,7 +205,8 @@ const ProductDetails = ({ data }) => {
                       ({averageRating}/5) Ratings
                     </h5>
                   </div>
-                  <div className={`${styles.button} bg-[#6443d1] mt-4 !rounded !h-11`}
+                  <div
+                    className={`${styles.button} bg-[#6443d1] mt-4 !rounded !h-11`}
                     onClick={handleMessageSubmit}
                   >
                     <span className="text-white flex items-center">
@@ -164,7 +217,10 @@ const ProductDetails = ({ data }) => {
               </div>
             </div>
           </div>
-          <ProductDetailsInfo data={data} products={products} totalReviewsLength={totalReviewsLength}
+          <ProductDetailsInfo
+            data={data}
+            products={products}
+            totalReviewsLength={totalReviewsLength}
             averageRating={averageRating}
           />
           <br />
@@ -175,41 +231,49 @@ const ProductDetails = ({ data }) => {
   );
 };
 
-const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating,}) => {
+const ProductDetailsInfo = ({
+  data,
+  products,
+  totalReviewsLength,
+  averageRating,
+}) => {
   const [active, setActive] = useState(1);
 
   return (
     <div className="bg-[#f5f6fb] px-3 800px:px-10 py-2 rounded">
       <div className="w-full flex justify-between border-b pt-10 pb-2">
         <div className="relative">
-          <h5 className={"text-[#000] text-[18px] px-1 leading-5 font-[600] cursor-pointer 800px:text-[20px]"}
+          <h5
+            className={
+              "text-[#000] text-[18px] px-1 leading-5 font-[600] cursor-pointer 800px:text-[20px]"
+            }
             onClick={() => setActive(1)}
           >
             Product Details
           </h5>
-          {active === 1 && (
-            <div className={`${styles.active_indicator}`} />
-          )}
+          {active === 1 && <div className={`${styles.active_indicator}`} />}
         </div>
         <div className="relative">
-          <h5 className={"text-[#000] text-[18px] px-1 leading-5 font-[600] cursor-pointer 800px:text-[20px]"}
+          <h5
+            className={
+              "text-[#000] text-[18px] px-1 leading-5 font-[600] cursor-pointer 800px:text-[20px]"
+            }
             onClick={() => setActive(2)}
           >
             Product Reviews
           </h5>
-          {active === 2 && (
-            <div className={`${styles.active_indicator}`} />
-          )}
+          {active === 2 && <div className={`${styles.active_indicator}`} />}
         </div>
         <div className="relative">
-          <h5 className={"text-[#000] text-[18px] px-1 leading-5 font-[600] cursor-pointer 800px:text-[20px]"}
+          <h5
+            className={
+              "text-[#000] text-[18px] px-1 leading-5 font-[600] cursor-pointer 800px:text-[20px]"
+            }
             onClick={() => setActive(3)}
           >
             Seller Information
           </h5>
-          {active === 3 && (
-            <div className={`${styles.active_indicator}`} />
-          )}
+          {active === 3 && <div className={`${styles.active_indicator}`} />}
         </div>
       </div>
       {active === 1 && (
@@ -222,9 +286,13 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating,
 
       {active === 2 && (
         <div className="w-full min-h-[40vh] flex flex-col items-center py-3 overflow-y-scroll">
-          {data && data.reviews.map((item, index) => (
+          {data &&
+            data.reviews.map((item, index) => (
               <div className="w-full flex my-2">
-                <img src={`${item.user.avatar}`} className="w-[50px] h-[50px] rounded-full"/>
+                <img
+                  src={`${item.user.avatar}`}
+                  className="w-[50px] h-[50px] rounded-full"
+                />
                 <div className="pl-2 ">
                   <div className="w-full flex items-center">
                     <h1 className="font-[500] mr-3">{item.user.name}</h1>
@@ -248,9 +316,14 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating,
           <div className="w-full 800px:w-[50%]">
             <Link to={`/shop/preview/${data.shop._id}`}>
               <div className="flex items-center">
-                <img src={`${data?.shop?.user.avatar}`} className="w-[50px] h-[50px] rounded-full"/>
+                <img
+                  src={`${data?.shop?.user.avatar}`}
+                  className="w-[50px] h-[50px] rounded-full"
+                />
                 <div className="pl-3">
-                  <h3 className={`${styles.shop_name}`}>{data.shop.user.name}</h3>
+                  <h3 className={`${styles.shop_name}`}>
+                    {data.shop.user.name}
+                  </h3>
                   <h5 className="pb-2 text-[15px]">
                     ({averageRating}/5) Ratings
                   </h5>

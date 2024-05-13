@@ -274,7 +274,7 @@ const AllOrders = () => {
       row.push({
         id: item._id,
         itemsQty: item.cart.length,
-        total: "$ " + item.totalPrice.toLocaleString(),
+        total: item.totalPrice.toLocaleString() + " VND",
         status: item.status,
       });
     });

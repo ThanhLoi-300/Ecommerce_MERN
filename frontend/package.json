@@ -19,6 +19,7 @@
     "@stripe/stripe-js": "^1.52.1",
     "axios": "^1.6.7",
     "country-state-city": "^3.2.1",
+    "date-fns": "^3.6.0",
     "firebase": "^10.8.0",
     "framer-motion": "^11.0.28",
     "react": "^18.2.0",

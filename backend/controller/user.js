@@ -84,7 +84,7 @@ module.exports = {
   loginUser: async (req, res, next) => {
     try {
       const { email, password } = req.body;
-      console.log(JSON.stringify(req.body))
+      console.log(JSON.stringify(req.body));
       const user = await User.findOne({ email: email }).select("+password");
 
       if (!user) return next(new ErrorHandler("User doesn't exists!", 400));
@@ -121,7 +121,13 @@ module.exports = {
 
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findById(req.user.id).populate("cart.product");
+      const user = await User.findById(req.user.id).populate({
+        path: "cart.product",
+        populate: {
+          path: "discount",
+          model: "Discount",
+        },
+      });
 
       if (!user) {
         return next(new ErrorHandler("User doesn't exists", 400));
@@ -182,7 +188,7 @@ module.exports = {
   updateUerInfo: async (req, res, next) => {
     try {
       const { phoneNumber, name, email } = req.body;
-      console.log(req.body)
+      console.log(req.body);
 
       const user = await User.findOne({ email }).select("+password");
 

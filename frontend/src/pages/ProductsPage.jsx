@@ -13,7 +13,7 @@ const ProductsPage = () => {
   const [data, setData] = useState([]);
   const [totalList, setTotalList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage] = useState(1);
+  const [productsPerPage] = useState(6);
   const [filter, setFilter] = useState({
     search: "",
     max: 0,
