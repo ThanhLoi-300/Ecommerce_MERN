@@ -16,11 +16,10 @@ const userSchema = new mongoose.Schema({
   ],
   addresses: [
     {
-      country: { type: String },
       city: { type: String },
-      address1: { type: String },
-      address2: { type: String },
-      zipCode: { type: Number },
+      district: { type: String },
+      ward: { type: String },
+      address: { type: String },
       addressType: { type: String },
     },
   ],

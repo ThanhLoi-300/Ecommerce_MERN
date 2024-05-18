@@ -113,11 +113,11 @@ const UserOrderDetails = () => {
           return (
             <div className="w-full flex items-start mb-5">
               <div>
-                {item.discount && (
+                {item.discount ? (
                   <div className="flex items-center justify-center absolute w-12 h-12 rounded-full bg-yellow-500 ml-16">
                     -{item.discount}%
                   </div>
-                )}
+                ): null}
                 <img
                   src={`${item.product.images[0]}`}
                   alt=""
@@ -263,14 +263,11 @@ const UserOrderDetails = () => {
           <h4 className="pt-3 text-[20px] font-[600]">Shipping Address:</h4>
           <h4 className="pt-3 text-[20px]">
             Address:{" "}
-            {data?.shippingAddress.address1 +
-              ", " +
-              data?.shippingAddress.address2}
+            {data?.shippingAddress.address}
           </h4>
           <h4 className=" text-[20px]">
-            Country: {data?.shippingAddress.country}
+            Area: {data?.shippingAddress.ward}, {data?.shippingAddress.district}, {data?.shippingAddress.city}
           </h4>
-          <h4 className=" text-[20px]">City: {data?.shippingAddress.city}</h4>
           <h4 className=" text-[20px]">Phone: 0{data?.user?.phoneNumber}</h4>
         </div>
         <div className="w-full 800px:w-[40%]">
@@ -278,6 +275,10 @@ const UserOrderDetails = () => {
           <h4>
             Status:{" "}
             {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
+          </h4>
+          <h4>
+            Type: {" "}
+            {data?.paymentInfo?.type }
           </h4>
           <br />
           {/* {data?.status === "Delivered" && (

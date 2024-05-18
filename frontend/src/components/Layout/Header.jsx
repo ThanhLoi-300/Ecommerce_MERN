@@ -9,7 +9,6 @@ import { CgProfile } from "react-icons/cg";
 import Navbar from "./Navbar";
 import { useSelector } from "react-redux";
 import Cart from "../cart/Cart";
-import Wishlist from "../Wishlist/Wishlist";
 import { RxCross1 } from "react-icons/rx";
 import DropDown from "./DropDown";
 

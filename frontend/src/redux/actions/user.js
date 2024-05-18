@@ -10,7 +10,7 @@ export const loadUser = () => async (dispatch) => {
     const { data } = await axios.get(`${server}/user/getuser`, {
       withCredentials: true,
     });
-    console.log(JSON.stringify(data.user))
+
     dispatch(loadUserSuccess(data.user));
   } catch (error) {
     dispatch(loadUserFail(error.response?.data.message));
@@ -66,6 +66,7 @@ export const updatUserAddress = (info) => async (dispatch) => {
       );
 
       dispatch(updateUserAddressSuccess(data.user));
+      dispatch(loadUser());
     } catch (error) {
       console.log(error);
     }
@@ -81,6 +82,7 @@ export const deleteUserAddress = (id) => async (dispatch) => {
     );
 
     dispatch(deleteUserAddressSuccess(data.user));
+    dispatch(loadUser());
   } catch (error) {
     console.log(error)
   }

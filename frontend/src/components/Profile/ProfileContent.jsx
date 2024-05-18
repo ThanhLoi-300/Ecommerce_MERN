@@ -25,6 +25,7 @@ import axios from "axios";
 import Input from "../Inputs/Input";
 import { deleteImage, uploadFile } from "../../utils/uploadFile";
 import { getAllOrdersOfUser } from "../../redux/actions/order";
+import SelectAddress from "../SelectAddress/SelectAddress";
 
 const ProfileContent = ({ active }) => {
   const { user, error, successMessage } = useSelector((state) => state.user);
@@ -247,6 +248,14 @@ const AllOrders = () => {
     },
 
     {
+      field: "type",
+      headerName: "Type",
+      type: "text",
+      minWidth: 50,
+      flex: 0.8,
+    },
+
+    {
       field: " ",
       flex: 1,
       minWidth: 150,
@@ -276,6 +285,7 @@ const AllOrders = () => {
         itemsQty: item.cart.length,
         total: item.totalPrice.toLocaleString() + " VND",
         status: item.status,
+        type: item.paymentInfo.type,
       });
     });
 
@@ -545,7 +555,7 @@ const ChangePassword = () => {
 const Address = () => {
   const [open, setOpen] = useState(false);
   const init = {
-    country: '', city: '', zipCode: '', address1: '', address2: '', addressType: ''
+    city: '', district: '', ward: '', address: '', addressType: ''
   }
   const [info, setInfo] = useState(init)
   const { user } = useSelector((state) => state.user);
@@ -569,10 +579,17 @@ const Address = () => {
     })
   }
 
+  const setAddress = (key, value) => {
+    setInfo({
+      ...info, [key]: value
+    })
+    console.log(info)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (info.addressType === "" || info.country === "" || info.city === "") {
+    if (info.addressType === "" || info.ward === "" || info.address === "") {
       toast.error("Please fill all the fields!");
     } else {
       const checkAddress = user.addresses.find(item => item.addressType == info.addressType)
@@ -580,7 +597,6 @@ const Address = () => {
       else {
         dispatch(updatUserAddress(info));
         toast.success("User address updated succesfully!")
-        dispatch(loadUser())
       }
     }
   };
@@ -589,7 +605,6 @@ const Address = () => {
     const id = item._id;
     dispatch(deleteUserAddress(id));
     toast.success("User address deleted successfully!")
-    dispatch(loadUser())
   };
 
   return (
@@ -606,61 +621,11 @@ const Address = () => {
             <div className="w-full">
               <form aria-required onSubmit={handleSubmit} className="w-full">
                 <div className="w-full block p-4">
-                  <div className="w-full pb-2">
-                    <label className="block pb-2">Country</label>
-                    <select name="country" id="" value={info.country}
-                      onChange={handleOnChange}
-                      className="w-[95%] border h-[40px] rounded-[5px]"
-                    >
-                      <option value="" className="block border pb-2">
-                        choose your country
-                      </option>
-                      {Country && Country.getAllCountries().map((item) => (
-                          <option className="block pb-2" key={item.isoCode} value={item.isoCode}>
-                            {item.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
+                  <SelectAddress setAddress={ setAddress} />
 
                   <div className="w-full pb-2">
-                    <label className="block pb-2">Choose your City</label>
-                    <select name="city" id="" value={info.city}
-                      onChange={handleOnChange}
-                      className="w-[95%] border h-[40px] rounded-[5px]"
-                    >
-                      <option value="" className="block border pb-2">
-                        choose your city
-                      </option>
-                      {State && State.getStatesOfCountry(info.country).map((item) => (
-                          <option className="block pb-2" key={item.isoCode} value={item.isoCode} >
-                            {item.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-
-                  <div className="w-full pb-2">
-                    <label className="block pb-2">Address 1</label>
-                    <input type="address" className={`${styles.input}`}
-                      required value={info.address1} name="address1"
-                      onChange={handleOnChange}
-                    />
-                  </div>
-                  <div className="w-full pb-2">
-                    <label className="block pb-2">Address 2</label>
-                    <input type="address" className={`${styles.input}`}
-                      required value={info.address2} name="address2"
-                      onChange={handleOnChange}
-                    />
-                  </div>
-
-                  <div className="w-full pb-2">
-                    <label className="block pb-2">Zip Code</label>
-                    <input type="number" className={`${styles.input}`}
-                      required value={info.zipCode} name="zipCode"
-                      onChange={handleOnChange}
-                    />
+                    <label className="block pb-2">Địa chỉ cụ thể</label>
+                    <input type="text" name="address" id="address" value={info.address} onChange={handleOnChange} className={`${styles.input} w-[95%]`}/>
                   </div>
 
                   <div className="w-full pb-2">
@@ -711,12 +676,12 @@ const Address = () => {
             </div>
             <div className="pl-8 flex items-center">
               <h6 className="text-[12px] 800px:text-[unset]">
-                {item.address1} {item.address2}
+                {item.address}
               </h6>
             </div>
             <div className="pl-8 flex items-center">
               <h6 className="text-[12px] 800px:text-[unset]">
-                {user && user.phoneNumber}
+                {user && ("0"+user.phoneNumber)}
               </h6>
             </div>
             <div className="min-w-[10%] flex items-center justify-between pl-8">

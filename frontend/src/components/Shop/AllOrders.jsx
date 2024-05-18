@@ -48,6 +48,14 @@ const AllOrders = () => {
     },
 
     {
+      field: "type",
+      headerName: "Type",
+      type: "text",
+      minWidth: 50,
+      flex: 0.6,
+    },
+
+    {
       field: " ",
       flex: 1,
       minWidth: 150,
@@ -75,8 +83,9 @@ const AllOrders = () => {
       row.push({
         id: item._id,
         itemsQty: item.cart.length,
-        total: "$ " + item.totalPrice.toLocaleString(),
+        total: item.totalPrice.toLocaleString()+" VND",
         status: item.status,
+        type: item.paymentInfo.type,
       });
     });
 

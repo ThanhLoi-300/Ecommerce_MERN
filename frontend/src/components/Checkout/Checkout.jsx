@@ -11,12 +11,11 @@ import { toast } from "react-toastify";
 const Checkout = () => {
   const { user, cart } = useSelector((state) => state.user);
   const [listSelected, setListSelected] = useState([]);
-  const [country, setCountry] = useState("");
+  const [district, setDistrict] = useState("");
+  const [ward, setWard] = useState("");
   const [city, setCity] = useState("");
   const [userInfo, setUserInfo] = useState(false);
-  const [address1, setAddress1] = useState("");
-  const [address2, setAddress2] = useState("");
-  const [zipCode, setZipCode] = useState(null);
+  const [address, setAddress] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [couponCodeData, setCouponCodeData] = useState(null);
   const [discountPrice, setDiscountPrice] = useState(null);
@@ -33,20 +32,13 @@ const Checkout = () => {
 
   const paymentSubmit = () => {
     if (
-      address1 === "" ||
-      address2 === "" ||
-      zipCode === null ||
-      country === "" ||
-      city === ""
+      address === "" || city === "" || ward === "" || district === ""
     ) {
       toast.error("Please choose your delivery address!");
     } else {
       const shippingAddress = {
-        address1,
-        address2,
-        zipCode,
-        country,
-        city,
+        address,
+        city,district,ward
       };
 
       const orderData = {
@@ -133,18 +125,13 @@ const Checkout = () => {
         <div className="w-full 800px:w-[65%]">
           <ShippingInfo
             user={user}
-            country={country}
-            setCountry={setCountry}
+            district={district} setDistrict={setDistrict} ward={ward} setWard={setWard}
             city={city}
             setCity={setCity}
             userInfo={userInfo}
             setUserInfo={setUserInfo}
-            address1={address1}
-            setAddress1={setAddress1}
-            address2={address2}
-            setAddress2={setAddress2}
-            zipCode={zipCode}
-            setZipCode={setZipCode}
+            address={address}
+            setAddress={setAddress}
           />
         </div>
         <div className="w-full 800px:w-[35%] 800px:mt-0 mt-8">
@@ -172,18 +159,13 @@ const Checkout = () => {
 
 const ShippingInfo = ({
   user,
-  country,
-  setCountry,
+  district, setDistrict, ward, setWard,
   city,
   setCity,
   userInfo,
   setUserInfo,
-  address1,
-  setAddress1,
-  address2,
-  setAddress2,
-  zipCode,
-  setZipCode,
+  address,
+  setAddress,
 }) => {
   return (
     <div className="w-full 800px:w-[95%] bg-white rounded-md p-5 pb-8">
@@ -217,94 +199,60 @@ const ShippingInfo = ({
             <input
               type="number"
               required
-              value={user && user.phoneNumber}
+              value={user && ("0"+user.phoneNumber)}
               className={`${styles.input} !w-[95%]`}
             />
-          </div>
-          <div className="w-[50%]">
-            <label className="block pb-2">Zip Code</label>
-            <input
-              type="number"
-              value={zipCode}
-              onChange={(e) => setZipCode(e.target.value)}
-              required
-              className={`${styles.input}`}
-            />
-          </div>
-        </div>
-
-        <div className="w-full flex pb-3">
-          <div className="w-[50%]">
-            <label className="block pb-2">Country</label>
-            <select
-              className="w-[95%] border h-[40px] rounded-[5px]"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            >
-              <option className="block pb-2" value="">
-                Choose your country
-              </option>
-              {Country &&
-                Country.getAllCountries().map((item) => (
-                  <option key={item.isoCode} value={item.isoCode}>
-                    {item.name}
-                  </option>
-                ))}
-            </select>
           </div>
           <div className="w-[50%]">
             <label className="block pb-2">City</label>
-            <select
-              className="w-[95%] border h-[40px] rounded-[5px]"
+            <input
+              type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-            >
-              <option className="block pb-2" value="">
-                Choose your City
-              </option>
-              {State &&
-                State.getStatesOfCountry(country).map((item) => (
-                  <option key={item.isoCode} value={item.isoCode}>
-                    {item.name}
-                  </option>
-                ))}
-            </select>
+              required
+              className={`${styles.input}`}
+            />
           </div>
         </div>
 
         <div className="w-full flex pb-3">
           <div className="w-[50%]">
-            <label className="block pb-2">Address1</label>
+            <label className="block pb-2">District</label>
             <input
-              type="address"
-              required
-              value={address1}
-              onChange={(e) => setAddress1(e.target.value)}
-              className={`${styles.input} !w-[95%]`}
+              className="w-[95%] border h-[40px] rounded-[5px]"
+              value={district}
+              onChange={(e) => setDistrict(e.target.value)}
             />
           </div>
           <div className="w-[50%]">
-            <label className="block pb-2">Address2</label>
+            <label className="block pb-2">Ward</label>
+            <input
+              className="w-[95%] border h-[40px] rounded-[5px]"
+              value={ward}
+              onChange={(e) => setWard(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="w-full flex pb-3">
+          <div className="w-[50%]">
+            <label className="block pb-2">Address</label>
             <input
               type="address"
-              value={address2}
-              onChange={(e) => setAddress2(e.target.value)}
               required
-              className={`${styles.input}`}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className={`${styles.input} !w-[95%]`}
             />
           </div>
         </div>
 
         <div></div>
       </form>
-      <h5
-        className="text-[18px] cursor-pointer inline-block"
-        onClick={() => setUserInfo(!userInfo)}
-      >
+      <h5 className="text-[18px] cursor-pointer inline-block" >
         Choose From saved address
       </h5>
-      {userInfo && (
-        <div>
+      <div>
           {user &&
             user.addresses.map((item, index) => (
               <div className="w-full flex mt-1">
@@ -313,18 +261,16 @@ const ShippingInfo = ({
                   className="mr-3"
                   value={item.addressType}
                   onClick={() =>
-                    setAddress1(item.address1) ||
-                    setAddress2(item.address2) ||
-                    setZipCode(item.zipCode) ||
-                    setCountry(item.country) ||
-                    setCity(item.city)
+                    setAddress(item.address) ||
+                    setCity(item.city) ||
+                    setWard(item.ward) ||
+                    setDistrict(item.district)
                   }
                 />
                 <h2>{item.addressType}</h2>
               </div>
             ))}
         </div>
-      )}
     </div>
   );
 };

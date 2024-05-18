@@ -274,7 +274,7 @@ module.exports = {
 
   updateAddress: async (req, res, next) => {
     try {
-      const user = await User.findById(req.user.id);
+      let user = await User.findById(req.user.id);
 
       const sameTypeAddress = user.addresses.find(
         (address) => address.addressType === req.body.addressType
@@ -296,7 +296,8 @@ module.exports = {
         user.addresses.push(req.body);
       }
 
-      await user.save();
+      user = await user.save();
+      console.log(user.addresses);
 
       res.status(200).json({
         success: true,
@@ -320,6 +321,7 @@ module.exports = {
       );
 
       const user = await User.findById(userId);
+      console.log(user.addresses);
 
       res.status(200).json({ success: true, user });
     } catch (error) {
