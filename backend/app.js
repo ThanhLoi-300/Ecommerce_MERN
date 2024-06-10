@@ -7,7 +7,7 @@ const cors = require("cors");
 const routes = require('./routes/index')
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'https://ecommerce-mern-frontend-fv9k.onrender.com/',
   credentials: true
 }));
 
