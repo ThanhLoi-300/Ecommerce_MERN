@@ -30,7 +30,7 @@ module.exports = {
       const activationToken = createActivationToken(user);
 
       //const activationUrl = `https://eshop-tutorial-pyri.vercel.app/activation/${activationToken}`;
-      const activationUrl = `http://localhost:5173/activation/${activationToken}`;
+      const activationUrl = `https://ecommerce-mern-frontend-fv9k.onrender.com/activation/${activationToken}`;
 
       try {
         await sendMail({
