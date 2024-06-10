@@ -156,7 +156,7 @@ const ProductDetails = ({ data }) => {
                   )}
                 </div>
                 {
-                  data.discount && (
+                  data.discount && data.discount.status && (
                     <CountdownTimer startDay={data.discount.startDay} endDay={data.discount.endDay}/>
                   )
                 }

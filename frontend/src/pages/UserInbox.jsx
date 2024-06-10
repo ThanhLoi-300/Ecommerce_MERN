@@ -11,7 +11,7 @@ import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
 import { TfiGallery } from "react-icons/tfi";
 import styles from "../styles/styles";
 import { uploadFile } from "../utils/uploadFile";
-const ENDPOINT = "http://localhost:4000/";
+const ENDPOINT = "https://ecommerce-mern-socket.onrender.com/";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const UserInbox = () => {

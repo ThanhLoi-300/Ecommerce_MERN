@@ -106,6 +106,7 @@ const Payment = () => {
     amount: Math.round(orderData?.totalPrice * 100),
   };
 
+  // credit card
   const paymentHandler = async (e) => {
     e.preventDefault();
     try {
@@ -336,7 +337,7 @@ const PaymentInfo = ({ user, open, setOpen, onApprove, createOrder, paymentHandl
                     <PayPalScriptProvider
                       options={{
                         "client-id":
-                          "Aczac4Ry9_QA1t4c7TKH9UusH3RTe6onyICPoCToHG10kjlNdI-qwobbW9JAHzaRQwFMn2-k660853jn",
+                          "AYuy04jbV3sb8pjx4ejd4np_DHVKzaQxOuAWtGi82VJBshEI0GYIfrpLAbP6GxLfBcvFADVZdvGWamYQ",
                       }}
                     >
                       <PayPalButtons style={{ layout: "vertical" }} onApprove={onApprove} createOrder={createOrder}/>
