@@ -12,6 +12,7 @@ import { uploadFile } from "../../utils/uploadFile";
 // import { format } from "timeago.js";
 const ENDPOINT = "https://ecommerce-mern-socket.onrender.com/";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
+import { format } from 'date-fns';
 
 const DashboardMessages = () => {
   const { seller, isLoading } = useSelector((state) => state.seller);
@@ -33,6 +34,7 @@ const DashboardMessages = () => {
         sender: data.senderId,
         text: data.text,
         createdAt: Date.now(),
+        images: data.images
       });
     });
   }, []);
@@ -75,9 +77,9 @@ const DashboardMessages = () => {
   }, [seller]);
 
   const onlineCheck = (chat) => {
-    const user = chat.user;
-    const online = onlineUsers.find((user) => user.userId === user);
-
+    const u = chat.user;
+    const online = onlineUsers.find((user) => user.userId === u);
+    console.log(onlineUsers)
     return online ? true : false;
   };
 
@@ -122,6 +124,7 @@ const DashboardMessages = () => {
           .then((res) => {
             setMessages([...messages, res.data.message]);
             updateLastMessage();
+            setNewMessage("")
           })
           .catch((error) => {
             console.log(error);
@@ -188,6 +191,7 @@ const DashboardMessages = () => {
                 online={onlineCheck(item)}
                 setActiveStatus={setActiveStatus}
                 isLoading={isLoading}
+                currentChat={currentChat}
               />
             ))}
         </>
@@ -205,6 +209,9 @@ const DashboardMessages = () => {
           activeStatus={activeStatus}
           scrollRef={scrollRef}
           setMessages={setMessages}
+          updateLastMessageForImage={updateLastMessageForImage}
+          setImages={setImages}
+          currentChat={currentChat }
         />
       )}
     </div>
@@ -221,9 +228,11 @@ const MessageList = ({
   online,
   setActiveStatus,
   isLoading,
+  currentChat
 }) => {
   const [user, setUser] = useState([]);
   const navigate = useNavigate();
+  
   const handleClick = (id) => {
     navigate(`/dashboard-messages?${id}`);
     setOpen(true);
@@ -292,6 +301,10 @@ const SellerInbox = ({
   sellerId,
   userData,
   activeStatus,
+  updateLastMessageForImage,
+  setImages,
+  currentChat,
+  setMessages
 }) => {
   const handleImageUpload = async (e) => {
     console.log("a");
@@ -302,7 +315,7 @@ const SellerInbox = ({
         if (reader.readyState === 2) {
           console.log(e);
           setImages(reader.result);
-          imageSendingHandler(reader.result);
+          imageSendingHandler(e.target.files[0]);
         }
       };
 
@@ -315,26 +328,26 @@ const SellerInbox = ({
   const imageSendingHandler = async (e) => {
     const receiverId = currentChat.user;
     const img = await uploadFile(e);
-    console.log(img);
-    // socketId.emit("sendMessage", {
-    //   senderId: seller._id,
-    //   receiverId,
-    //   images: img,
-    // });
+    console.log("img ",img);
+    socketId.emit("sendMessage", {
+      senderId: sellerId,
+      receiverId,
+      images: img,
+    });
 
     try {
-      // await axios
-      //   .post(`${server}/message/create-new-message`, {
-      //     images: e,
-      //     sender: seller._id,
-      //     text: newMessage,
-      //     conversationId: currentChat._id,
-      //   })
-      //   .then((res) => {
-      //     setImages();
-      //     setMessages([...messages, res.data.message]);
-      //     updateLastMessageForImage();
-      //   });
+      await axios
+        .post(`${server}/message/create-new-message`, {
+          images: img,
+          sender: sellerId,
+          text: newMessage,
+          conversationId: currentChat._id,
+        })
+        .then((res) => {
+          setImages();
+          setMessages([...messages, res.data.message]);
+          updateLastMessageForImage();
+        });
     } catch (error) {
       console.log(error);
     }
@@ -383,12 +396,17 @@ const SellerInbox = ({
                   />
                 )}
                 {item.images && (
+                  <div className="flex flex-col">
                   <img
-                    src={`${item.images?.url}`}
+                    src={`${item.images}`}
                     className="w-[300px] h-[300px] object-cover rounded-[10px] mr-2"
                   />
+                  <p className="text-[12px] text-[#000000d3] pt-1">
+                      {/* {format(item.createdAt)} */}
+                      {format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm:ss')}
+                    </p></div>
                 )}
-                {item.text !== "" && (
+                {item.text && (
                   <div>
                     <div
                       className={`w-max p-2 rounded ${
@@ -400,7 +418,7 @@ const SellerInbox = ({
 
                     <p className="text-[12px] text-[#000000d3] pt-1">
                       {/* {format(item.createdAt)} */}
-                      {item.createdAt}
+                      {format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm:ss')}
                     </p>
                   </div>
                 )}

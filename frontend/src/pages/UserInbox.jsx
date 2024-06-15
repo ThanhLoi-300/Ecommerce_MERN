@@ -11,6 +11,7 @@ import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
 import { TfiGallery } from "react-icons/tfi";
 import styles from "../styles/styles";
 import { uploadFile } from "../utils/uploadFile";
+import { RxCross1 } from "react-icons/rx";
 const ENDPOINT = "https://ecommerce-mern-socket.onrender.com/";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
@@ -34,6 +35,7 @@ const UserInbox = () => {
         sender: data.senderId,
         text: data.text,
         createdAt: Date.now(),
+        images: data.images
       });
     });
   }, []);
@@ -119,6 +121,7 @@ const UserInbox = () => {
           .then((res) => {
             setMessages([...messages, res.data.message]);
             updateLastMessage();
+            setNewMessage("")
           })
           .catch((error) => {
             console.log(error);
@@ -203,6 +206,11 @@ const UserInbox = () => {
     scrollRef.current?.scrollIntoView({ beahaviour: "smooth" });
   }, [messages]);
 
+  const navigate = useNavigate();
+  const back = () => {
+    navigate(`/profile`)
+  }
+
   return (
     <div className="w-full">
       {!open && (
@@ -211,6 +219,11 @@ const UserInbox = () => {
           <h1 className="text-center text-[30px] py-3 font-Poppins">
             All Messages
           </h1>
+          <RxCross1
+                size={30}
+                onClick={back}
+                className="cursor-pointer flex float-end m-2"
+              />
           {/* All messages list */}
           {conversations &&
             conversations.map((item, index) => (
@@ -263,6 +276,7 @@ const MessageList = ({
 }) => {
   const [active, setActive] = useState(0);
   const [userShop, setUserShop] = useState([]);
+
   const navigate = useNavigate();
   const handleClick = (id) => {
     navigate(`/inbox?${id}`);
@@ -385,7 +399,7 @@ const SellerInbox = ({
                   </p>
                 </div>
               )}
-              {item.text !== "" && (
+              {item.text && (
                 <div>
                   <div
                     className={`w-max p-2 rounded ${

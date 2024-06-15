@@ -18,7 +18,6 @@ import {
   updatUserAddress,
   updateUserInformation,
 } from "../../redux/actions/user";
-import { Country, State } from "country-state-city";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -26,6 +25,8 @@ import Input from "../Inputs/Input";
 import { deleteImage, uploadFile } from "../../utils/uploadFile";
 import { getAllOrdersOfUser } from "../../redux/actions/order";
 import SelectAddress from "../SelectAddress/SelectAddress";
+import DetailOrder from "../Order/DetailOrder";
+import Loader from "../Layout/Loader";
 
 const ProfileContent = ({ active }) => {
   const { user, error, successMessage } = useSelector((state) => state.user);
@@ -60,7 +61,8 @@ const ProfileContent = ({ active }) => {
       if (reader.readyState === 2) {
         try {
           const url = await uploadFile(e.target.files[0]);
-          await axios.put(`${server}/user/update-avatar`,
+          await axios.put(
+            `${server}/user/update-avatar`,
             { avatar: url }, // Sử dụng url từ uploadFile
             { withCredentials: true }
           );
@@ -71,11 +73,15 @@ const ProfileContent = ({ active }) => {
         }
       }
     };
-    
-    if (user.avatar && user.avatar.length > 0 && user.avatar.startsWith("https://firebasestorage.googleapis.com")) {
-      deleteImage(user.avatar)
+
+    if (
+      user.avatar &&
+      user.avatar.length > 0 &&
+      user.avatar.startsWith("https://firebasestorage.googleapis.com")
+    ) {
+      deleteImage(user.avatar);
     }
-      
+
     reader.readAsDataURL(e.target.files[0]);
   };
 
@@ -210,95 +216,70 @@ const ProfileContent = ({ active }) => {
 
 const AllOrders = () => {
   const { user } = useSelector((state) => state.user);
-  const { orders } = useSelector((state) => state.order);
+  const { orders, isLoading } = useSelector((state) => state.order);
+  const [activeTab, setActiveTab] = useState(0);
+  const [dataOrder, setDataOrder] = useState([]);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getAllOrdersOfUser(user._id));
   }, []);
 
-  const columns = [
-    { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
+  useEffect(() => {
+    const renderData = () => {
+      if (activeTab === 0)
+        setDataOrder(orders?.filter((i) => i.status === "Processing"));
+      else if (activeTab === 1)
+        setDataOrder(orders?.filter((i) => i.status === "Shipping"));
+      else if (activeTab === 2)
+        setDataOrder(orders?.filter((i) => i.status === "Delivered"));
+      else if (activeTab === 3)
+        setDataOrder(orders?.filter((i) => i.status === "Canceled"));
+    };
+    renderData();
+  }, [activeTab, orders]);
 
-    {
-      field: "status",
-      headerName: "Status",
-      minWidth: 130,
-      flex: 0.7,
-      cellClassName: (params) => {
-        return params.getValue(params.id, "status") === "Delivered"
-          ? "greenColor"
-          : "redColor";
-      },
-    },
-    {
-      field: "itemsQty",
-      headerName: "Items Qty",
-      type: "number",
-      minWidth: 130,
-      flex: 0.7,
-    },
-
-    {
-      field: "total",
-      headerName: "Total",
-      type: "number",
-      minWidth: 130,
-      flex: 0.8,
-    },
-
-    {
-      field: "type",
-      headerName: "Type",
-      type: "text",
-      minWidth: 50,
-      flex: 0.8,
-    },
-
-    {
-      field: " ",
-      flex: 1,
-      minWidth: 150,
-      headerName: "",
-      type: "number",
-      sortable: false,
-      renderCell: (params) => {
-        return (
-          <>
-            <Link to={`/user/order/${params.id}`}>
-              <Button>
-                <AiOutlineArrowRight size={20} />
-              </Button>
-            </Link>
-          </>
-        );
-      },
-    },
-  ];
-
-  const row = [];
-
-  orders &&
-    orders.forEach((item) => {
-      row.push({
-        id: item._id,
-        itemsQty: item.cart.length,
-        total: item.totalPrice.toLocaleString() + " VND",
-        status: item.status,
-        type: item.paymentInfo.type,
-      });
-    });
+  const tabs = ["Processing", "Shipping", "Recieved", "Canceled"];
 
   return (
-    <div className="pl-8 pt-1">
-      <DataGrid
-        rows={row}
-        columns={columns}
-        pageSize={10}
-        disableSelectionOnClick
-        autoHeight
-      />
-    </div>
+    <>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <div className="pl-8 pt-1">
+          <div className="flex gap-2 justify-center">
+            {tabs.map((tab, index) => (
+              <div
+                className={`rounded-tr-[15px] rounded-bl-[15px] cursor-pointer text-white
+                        mb-4 px-2 py-2
+                        ${
+                          activeTab === index
+                            ? "bg-black"
+                            : "bg-gray-600 hover:bg-slate-800"
+                        }
+                        transition-colors duration-300`}
+                onClick={() => setActiveTab(index)}
+              >
+                {tab}
+              </div>
+            ))}
+          </div>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="px-4 py-2">Time</th>
+                <th className="px-4 py-2">Total</th>
+                <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">Detail</th>
+              </tr>
+            </thead>
+            {dataOrder?.map((i) => (
+              <DetailOrder order={i} type={ "user"} />
+            ))}
+          </table>
+        </div>
+      )}
+    </>
   );
 };
 
@@ -555,9 +536,13 @@ const ChangePassword = () => {
 const Address = () => {
   const [open, setOpen] = useState(false);
   const init = {
-    city: '', district: '', ward: '', address: '', addressType: ''
-  }
-  const [info, setInfo] = useState(init)
+    city: "",
+    district: "",
+    ward: "",
+    address: "",
+    addressType: "",
+  };
+  const [info, setInfo] = useState(init);
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
@@ -575,16 +560,18 @@ const Address = () => {
 
   const handleOnChange = (e) => {
     setInfo({
-      ...info, [e.target.name]: e.target.value
-    })
-  }
+      ...info,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const setAddress = (key, value) => {
     setInfo({
-      ...info, [key]: value
-    })
-    console.log(info)
-  }
+      ...info,
+      [key]: value,
+    });
+    console.log(info);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -592,11 +579,13 @@ const Address = () => {
     if (info.addressType === "" || info.ward === "" || info.address === "") {
       toast.error("Please fill all the fields!");
     } else {
-      const checkAddress = user.addresses.find(item => item.addressType == info.addressType)
-      if (checkAddress) toast.error("AddressType is existed")
+      const checkAddress = user.addresses.find(
+        (item) => item.addressType == info.addressType
+      );
+      if (checkAddress) toast.error("AddressType is existed");
       else {
         dispatch(updatUserAddress(info));
-        toast.success("User address updated succesfully!")
+        toast.success("User address updated succesfully!");
       }
     }
   };
@@ -604,7 +593,7 @@ const Address = () => {
   const handleDelete = (item) => {
     const id = item._id;
     dispatch(deleteUserAddress(id));
-    toast.success("User address deleted successfully!")
+    toast.success("User address deleted successfully!");
   };
 
   return (
@@ -613,7 +602,11 @@ const Address = () => {
         <div className="fixed w-full h-screen bg-[#0000004b] top-0 left-0 flex items-center justify-center">
           <div className="w-[35%] h-[80vh] bg-white rounded shadow relative overflow-y-scroll custom-dashboard border-4">
             <div className="w-full flex justify-end p-3">
-              <RxCross1 size={30} className="cursor-pointer" onClick={() => setOpen(false)} />
+              <RxCross1
+                size={30}
+                className="cursor-pointer"
+                onClick={() => setOpen(false)}
+              />
             </div>
             <h1 className="text-center text-[25px] font-Poppins">
               Add New Address
@@ -621,24 +614,39 @@ const Address = () => {
             <div className="w-full">
               <form aria-required onSubmit={handleSubmit} className="w-full">
                 <div className="w-full block p-4">
-                  <SelectAddress setAddress={ setAddress} />
+                  <SelectAddress setAddress={setAddress} />
 
                   <div className="w-full pb-2">
                     <label className="block pb-2">Địa chỉ cụ thể</label>
-                    <input type="text" name="address" id="address" value={info.address} onChange={handleOnChange} className={`${styles.input} w-[95%]`}/>
+                    <input
+                      type="text"
+                      name="address"
+                      id="address"
+                      value={info.address}
+                      onChange={handleOnChange}
+                      className={`${styles.input} w-[95%]`}
+                    />
                   </div>
 
                   <div className="w-full pb-2">
                     <label className="block pb-2">Address Type</label>
-                    <select name="addressType" id="" value={info.addressType}
+                    <select
+                      name="addressType"
+                      id=""
+                      value={info.addressType}
                       onChange={handleOnChange}
                       className="w-[95%] border h-[40px] rounded-[5px]"
                     >
                       <option value="" className="block border pb-2">
                         Choose your Address Type
                       </option>
-                      {addressTypeData && addressTypeData.map((item) => (
-                          <option className="block pb-2" key={item.name} value={item.name}>
+                      {addressTypeData &&
+                        addressTypeData.map((item) => (
+                          <option
+                            className="block pb-2"
+                            key={item.name}
+                            value={item.name}
+                          >
                             {item.name}
                           </option>
                         ))}
@@ -646,7 +654,12 @@ const Address = () => {
                   </div>
 
                   <div className=" w-full pb-2">
-                    <input type="submit" className={`${styles.input} mt-5 cursor-pointer`} required readOnly/>
+                    <input
+                      type="submit"
+                      className={`${styles.input} mt-5 cursor-pointer`}
+                      required
+                      readOnly
+                    />
                   </div>
                 </div>
               </form>
@@ -666,7 +679,8 @@ const Address = () => {
         </div>
       </div>
       <br />
-      {user && user.addresses.map((item, index) => (
+      {user &&
+        user.addresses.map((item, index) => (
           <div
             className="w-full bg-white h-min 800px:h-[70px] rounded-[4px] flex items-center px-3 shadow justify-between pr-10 mb-5"
             key={index}
@@ -675,13 +689,11 @@ const Address = () => {
               <h5 className="pl-5 font-[600]">{item.addressType}</h5>
             </div>
             <div className="pl-8 flex items-center">
-              <h6 className="text-[12px] 800px:text-[unset]">
-                {item.address}
-              </h6>
+              <h6 className="text-[12px] 800px:text-[unset]">{item.address}</h6>
             </div>
             <div className="pl-8 flex items-center">
               <h6 className="text-[12px] 800px:text-[unset]">
-                {user && ("0"+user.phoneNumber)}
+                {user && "0" + user.phoneNumber}
               </h6>
             </div>
             <div className="min-w-[10%] flex items-center justify-between pl-8">

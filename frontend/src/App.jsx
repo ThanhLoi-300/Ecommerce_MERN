@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import {
   ActivationPage,
@@ -39,40 +39,27 @@ import {
 } from "./routes/ShopRoutes";
 import ShopAllProducts from "./pages/Shop/ShopAllProducts";
 import { getAllProducts } from "./redux/actions/product";
-import axios from "axios";
-import { server } from "./server";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
+import AllOrderOfUser from "./components/Shop/AllOrderOfUser";
+import ShopAllOrdersOfUser from "./pages/Shop/ShopAllOrdersOfUser";
 
 const App = () => {
-  const [stripeApikey, setStripeApiKey] = useState("");
-
-  async function getStripeApikey() {
-    const { data } = await axios.get(`${server}/payment/stripeapikey`);
-    setStripeApiKey(data.stripeApikey);
-  }
   useEffect(() => {
     Store.dispatch(loadUser());
     Store.dispatch(loadSeller());
     Store.dispatch(getAllProducts());
-    getStripeApikey();
   }, []);
   return (
     <BrowserRouter>
-      {stripeApikey && (
-        <Elements stripe={loadStripe(stripeApikey)}>
-          <Routes>
-            <Route
-              path="/payment"
-              element={
-                <ProtectedRoute>
-                  <PaymentPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Elements>
-      )}
+      <Routes>
+        <Route
+          path="/payment"
+          element={
+            <ProtectedRoute>
+              <PaymentPage />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
       <Routes>
         <Route path="/" element={<HomePage />}></Route>
         <Route path="/login" element={<LoginPage />}></Route>
@@ -185,28 +172,26 @@ const App = () => {
         />
 
         <Route
-          path="/user/order/:id"
+          path="/orderUser/:id"
           element={
-            <OrderDetailsPage />
+            <SellerProtectedRoute>
+              <ShopAllOrdersOfUser />
+            </SellerProtectedRoute>
           }
         />
 
-        <Route
-          path="/user/track/order/:id"
-          element={
-            <TrackOrderPage />
-          }
-        />
+        <Route path="/user/order/:id" element={<OrderDetailsPage />} />
+
+        <Route path="/user/track/order/:id" element={<TrackOrderPage />} />
 
         <Route
           path="/inbox"
           element={
             // <ProtectedRoute>
-              <UserInbox />
+            <UserInbox />
             // </ProtectedRoute>
           }
         />
-
       </Routes>
       <ToastContainer
         position="bottom-center"

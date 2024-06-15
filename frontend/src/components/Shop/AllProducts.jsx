@@ -109,7 +109,50 @@ const AllProducts = () => {
         <Loader />
       ) : (
         <div className="w-full mx-8 pt-1 mt-10 bg-white">
-          <DataGrid rows={row} columns={columns} pageSize={10} disableSelectionOnClick autoHeight/>
+          <div className="flex justify-center text-4xl mb-5">Products</div>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="px-4 py-2">STT</th>
+                <th className="px-4 py-2">Img</th>
+                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Quantity</th>
+                <th className="px-4 py-2">Price</th>
+                <th className="px-4 py-2">Preview</th>
+                <th className="px-4 py-2">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products?.map((i, index) => (
+                <tr className="border-b-2 ">
+                  <td className="px-4 py-2">{index + 1}</td>
+                  <td className="px-4 py-2">
+                    <img src={i.images[0]} width="100" />
+                  </td>
+                  <td className="px-4 py-2">
+                    {i.name.length > 10 ? i.name.slice(0, 10) + "..." : i.name}
+                  </td>
+                  <td className="px-4 py-2">{i.stock}</td>
+                  <td className="px-4 py-2">
+                    {i.originalPrice.toLocaleString()} VND
+                  </td>
+                  <td className="px-4 py-2">
+                    <Link to={`/product/${i._id}`}>
+                      <Button>
+                        <AiOutlineEye size={20} />
+                      </Button>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2">
+                    <Button onClick={() => handleDelete(i._id)}>
+                      <AiOutlineDelete size={20} />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {/* <DataGrid rows={row} columns={columns} pageSize={10} disableSelectionOnClick autoHeight/> */}
         </div>
       )}
     </>
