@@ -32,6 +32,7 @@ const Login = () => {
         window.location.reload(true); 
       })
       .catch((err) => {
+        toast.error("Account is wrong");
         console.log(JSON.stringify(err))
       });
   };
