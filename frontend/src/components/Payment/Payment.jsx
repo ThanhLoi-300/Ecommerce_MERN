@@ -100,10 +100,10 @@ const Payment = () => {
       .post(`${server}/order/create-order`, order, config)
       .then((res) => {
         setOpen(false);
-        navigate("/order/success");
+        navigate("/");
         toast.success("Order successful!");
         localStorage.setItem("listSelected", JSON.stringify([]));
-        window.location.reload();
+        // window.location.reload();
       });
   };
 
@@ -132,7 +132,7 @@ const Payment = () => {
       .post(`${server}/order/create-order`, order, config)
       .then((res) => {
         setOpen(false);
-        navigate("/order/success");
+        navigate("/");
         toast.success("Order successful!");
         localStorage.setItem("cartItems", JSON.stringify([]));
         localStorage.setItem("latestOrder", JSON.stringify([]));
