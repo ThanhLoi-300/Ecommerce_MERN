@@ -100,6 +100,12 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("changeOrderStatus", (payload) => {
+    console.log(payload)
+    const user = getUser(payload.shopId);
+    io.to(user?.socketId).emit("getOrder", {payload});
+  });
+
   //when disconnect
   socket.on("disconnect", () => {
     console.log(`a user disconnected!`);

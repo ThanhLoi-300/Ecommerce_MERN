@@ -2,25 +2,29 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../../styles/styles";
 import { useEffect } from "react";
-import {
-  CardNumberElement,
-  CardCvcElement,
-  CardExpiryElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { server } from "../../server";
+import { ENDPOINT, server } from "../../server";
 import { toast } from "react-toastify";
 import { RxCross1 } from "react-icons/rx";
+
+import socketIO from "socket.io-client";
+
+const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const Payment = () => {
   const [orderData, setOrderData] = useState([]);
   const [open, setOpen] = useState(false);
   const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      socketId.emit("addUser", user?._id);
+      socketId.on("addUser", user?._id);
+    }
+  }, [user]);
 
   useEffect(() => {
     const orderData = JSON.parse(localStorage.getItem("listSelected"));

@@ -3,8 +3,8 @@ module.exports = {
   secretKey: 'K951B6PE1waDMi640xX08PD3vg6EkVlz',
   orderInfo: 'pay with MoMo',
   partnerCode: 'MOMO',
-  redirectUrl: 'http://localhost:5000/views/home.html',
-  ipnUrl: 'https://ecommerce-mern-backend-2f7a.onrender.com/api/payment/callback', //chú ý: cần dùng ngrok thì momo mới post đến url này được
+  redirectUrl: 'https://ecommerce-mern-frontend-fv9k.onrender.com',
+  ipnUrl: 'https://jskw989d-8000.asse.devtunnels.ms/payment/callback', // ipnUrl: 'https://ecommerce-mern-backend-2f7a.onrender.com/api/payment/callback',
   requestType: 'payWithMethod',
   extraData: '',
   orderGroupId: '',

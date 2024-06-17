@@ -23,7 +23,8 @@ const DetailOrder = ({ order, type }) => {
             {order.status}
           </span>
         </td>
-        <td className="px-4 py-2">
+        <td>{order.paymentInfo.type}</td>
+        <td className="px-4 py-2 cursor-pointer">
           <Link to={url}>
             <AiOutlineArrowRight size={20} />
           </Link>

@@ -2,9 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import Header from "../components/Layout/Header";
 import { useSelector } from "react-redux";
 import socketIO from "socket.io-client";
-// import { format } from "timeago.js";
 import { format } from "date-fns";
-import { server } from "../server";
+import { ENDPOINT, server } from "../server";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
@@ -12,7 +11,7 @@ import { TfiGallery } from "react-icons/tfi";
 import styles from "../styles/styles";
 import { uploadFile } from "../utils/uploadFile";
 import { RxCross1 } from "react-icons/rx";
-const ENDPOINT = "https://ecommerce-mern-socket.onrender.com/";
+
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const UserInbox = () => {

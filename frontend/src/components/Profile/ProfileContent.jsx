@@ -5,7 +5,7 @@ import {
   AiOutlineDelete,
 } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
-import { server } from "../../server";
+import { ENDPOINT, server } from "../../server";
 import styles from "../../styles/styles";
 import { DataGrid } from "@material-ui/data-grid";
 import { Button } from "@material-ui/core";
@@ -27,6 +27,7 @@ import { getAllOrdersOfUser } from "../../redux/actions/order";
 import SelectAddress from "../SelectAddress/SelectAddress";
 import DetailOrder from "../Order/DetailOrder";
 import Loader from "../Layout/Loader";
+import socketIO from "socket.io-client";
 
 const ProfileContent = ({ active }) => {
   const { user, error, successMessage } = useSelector((state) => state.user);
@@ -220,6 +221,7 @@ const AllOrders = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [dataOrder, setDataOrder] = useState([]);
   const dispatch = useDispatch();
+  const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
   useEffect(() => {
     dispatch(getAllOrdersOfUser(user._id));
@@ -270,6 +272,7 @@ const AllOrders = () => {
                 <th className="px-4 py-2">Time</th>
                 <th className="px-4 py-2">Total</th>
                 <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">Type</th>
                 <th className="px-4 py-2">Detail</th>
               </tr>
             </thead>

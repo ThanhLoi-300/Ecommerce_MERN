@@ -1,12 +1,13 @@
-import { Button } from "@material-ui/core";
-import { DataGrid } from "@material-ui/data-grid";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Loader from "../Layout/Loader";
 import { getAllOrdersOfShop } from "../../redux/actions/order";
-import { AiOutlineArrowRight } from "react-icons/ai";
 import DetailOrder from "../Order/DetailOrder";
+import { ENDPOINT, server } from "../../server";
+import socketIO from "socket.io-client";
+
+const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const AllOrderOfUser = () => {
   const { id } = useParams();
@@ -21,6 +22,13 @@ const AllOrderOfUser = () => {
   useEffect(() => {
     dispatch(getAllOrdersOfShop(seller._id));
   }, [dispatch]);
+
+  useEffect(() => {
+    socketId.emit("addUser", seller._id);
+    socketId.on("getOrder", (data) => {
+      dispatch(getAllOrdersOfShop(seller._id));
+    });
+  }, []);
 
   useEffect(() => {
     const renderData = () => {
@@ -78,6 +86,7 @@ const AllOrderOfUser = () => {
                 <th className="px-4 py-2">Time</th>
                 <th className="px-4 py-2">Total</th>
                 <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">Type</th>
                 <th className="px-4 py-2">Detail</th>
               </tr>
             </thead>

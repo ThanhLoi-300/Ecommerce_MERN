@@ -12,7 +12,8 @@ const styles = {
     cart_button_text:"text-[#fff] text-[16px] font-[600]",
     input:"w-full border p-1 rounded-[5px]",
     activeStatus:"w-[10px] h-[10px] rounded-full absolute top-0 right-1 bg-[#40d132]",
-    noramlFlex:"flex items-center"
+    noramlFlex: "flex items-center",
+    button_cancel: 'w-[150px] bg-red-500 h-[50px] my-3 flex items-center justify-center rounded-xl cursor-pointer',
   };
   
   export default styles;

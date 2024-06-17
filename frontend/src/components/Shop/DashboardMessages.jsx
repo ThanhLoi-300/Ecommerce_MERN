@@ -1,18 +1,17 @@
 import axios from "axios";
 import React, { useRef, useState } from "react";
 import { useEffect } from "react";
-import { server } from "../../server";
-import { useDispatch, useSelector } from "react-redux";
+import { ENDPOINT, server } from "../../server";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
 import styles from "../../styles/styles";
 import { TfiGallery } from "react-icons/tfi";
 import socketIO from "socket.io-client";
 import { uploadFile } from "../../utils/uploadFile";
-// import { format } from "timeago.js";
-const ENDPOINT = "https://ecommerce-mern-socket.onrender.com/";
-const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 import { format } from 'date-fns';
+
+const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const DashboardMessages = () => {
   const { seller, isLoading } = useSelector((state) => state.seller);

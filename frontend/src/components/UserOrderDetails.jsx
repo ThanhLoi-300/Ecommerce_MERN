@@ -4,11 +4,14 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "../styles/styles";
 import { getAllOrdersOfUser } from "../redux/actions/order";
-import { server } from "../server";
+import { ENDPOINT, server } from "../server";
 import { RxCross1 } from "react-icons/rx";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import axios from "axios";
 import { toast } from "react-toastify";
+import socketIO from "socket.io-client";
+
+const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const UserOrderDetails = () => {
   const { orders } = useSelector((state) => state.order);
@@ -26,6 +29,12 @@ const UserOrderDetails = () => {
   useEffect(() => {
     dispatch(getAllOrdersOfUser(user?._id));
   }, [dispatch, user?._id]);
+
+  useEffect(() => {
+    if (user) {
+      socketId.emit("addUser", user?._id);
+    }
+  }, [user]);
 
   const data = orders && orders.find((item) => item._id === id);
 
@@ -54,21 +63,12 @@ const UserOrderDetails = () => {
       });
   };
 
-  const refundHandler = async () => {
-    await axios
-      .put(`${server}/order/order-refund/${id}`, {
-        status: "Processing refund",
-      })
-      .then((res) => {
-        toast.success(res.data.message);
-        dispatch(getAllOrdersOfUser(user._id));
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
-      });
-  };
+  useEffect(() => {
+    if (status === "Canceled") orderUpdateHandler();
+  }, [status]);
 
   const orderUpdateHandler = async (e) => {
+    socketId.emit("changeOrderStatus", {orderId: data._id, shopId: data.cart[0].product.shop});
     await axios
       .put(
         `${server}/order/update-order-status/${id}`,
@@ -117,7 +117,7 @@ const UserOrderDetails = () => {
                   <div className="flex items-center justify-center absolute w-12 h-12 rounded-full bg-yellow-500 ml-16">
                     -{item.discount}%
                   </div>
-                ): null}
+                ) : null}
                 <img
                   src={`${item.product.images[0]}`}
                   alt=""
@@ -262,11 +262,11 @@ const UserOrderDetails = () => {
         <div className="w-full 800px:w-[60%]">
           <h4 className="pt-3 text-[20px] font-[600]">Shipping Address:</h4>
           <h4 className="pt-3 text-[20px]">
-            Address:{" "}
-            {data?.shippingAddress.address}
+            Address: {data?.shippingAddress.address}
           </h4>
           <h4 className=" text-[20px]">
-            Area: {data?.shippingAddress.ward}, {data?.shippingAddress.district}, {data?.shippingAddress.city}
+            Area: {data?.shippingAddress.ward}, {data?.shippingAddress.district}
+            , {data?.shippingAddress.city}
           </h4>
           <h4 className=" text-[20px]">Phone: 0{data?.user?.phoneNumber}</h4>
         </div>
@@ -276,10 +276,7 @@ const UserOrderDetails = () => {
             Status:{" "}
             {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
           </h4>
-          <h4>
-            Type: {" "}
-            {data?.paymentInfo?.type }
-          </h4>
+          <h4>Type: {data?.paymentInfo?.type}</h4>
           <br />
           {/* {data?.status === "Delivered" && (
             <div
@@ -293,36 +290,50 @@ const UserOrderDetails = () => {
       </div>
       <h4 className="pt-3 text-[20px] font-[600]">Order Status:</h4>
       {data?.status !== "Processing refund" &&
-        data?.status !== "Delivered" && data?.status !== "Processing" &&
-        data?.status !== "Refund Success" ? (
-          <>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
-            >
-              {["Processing", "Shipping", "Received"]
-                .slice(
-                  ["Processing", "Shipping", "Received"].indexOf(data?.status)
-                )
-                .map((option, index) => (
-                  <option value={option} key={index}>
-                    {option}
-                  </option>
-                ))}
-            </select>
-            <div
-              className={`${styles.button} mt-5 !bg-[#FCE1E6] !rounded-[4px] text-[#E94560] font-[600] !h-[45px] text-[18px]`}
-              onClick={orderUpdateHandler}
-            >
-              Update Status
-            </div>
-          </>
-        ): data?.status}
+      data?.status !== "Delivered" &&
+      data?.status !== "Canceled" &&
+      data?.status !== "Processing" &&
+      data?.status !== "Refund Success" ? (
+        <>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
+          >
+            {["Processing", "Shipping", "Received"]
+              .slice(
+                ["Processing", "Shipping", "Received"].indexOf(data?.status)
+              )
+              .map((option, index) => (
+                <option value={option} key={index}>
+                  {option}
+                </option>
+              ))}
+          </select>
+          <div
+            className={`${styles.button} mt-5 !bg-[#FCE1E6] !rounded-[4px] text-[#E94560] font-[600] !h-[45px] text-[18px]`}
+            onClick={orderUpdateHandler}
+          >
+            Update Status
+          </div>
+        </>
+      ) : (
+        data?.status
+      )}
       <br />
-      <Link to="/">
+      {/* <Link to="/">
         <div className={`${styles.button} text-white`}>Send Message</div>
-      </Link>
+      </Link> */}
+      {data?.status === "Processing" && data?.paymentInfo.type === "Cash On Delivery" && (
+        <div
+          className={`${styles.button_cancel} text-white`}
+          onClick={() => {
+            setStatus("Canceled");
+          }}
+        >
+          Cancel
+        </div>
+      )}
       <br />
       <br />
     </div>

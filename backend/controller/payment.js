@@ -40,9 +40,11 @@ module.exports = {
       autoCapture,
       lang,
     } = momo;
-    var amount = "1";
+    var amount = "1000";
     var orderId = partnerCode + new Date().getTime();
     var requestId = orderId;
+    const expiredTime = new Date(Date.now() + 3600000).toISOString(); // Liên kết hết hạn sau 1 giờ
+    const expiredDuration = 3600; // Liên kết có thể sử dụng trong vòng 1 giờ
 
     //before sign HMAC SHA256 with format
     var rawSignature =
@@ -90,6 +92,8 @@ module.exports = {
       extraData: extraData,
       orderGroupId: orderGroupId,
       signature: signature,
+      // expiredTime,
+      // expiredDuration,
     });
 
     // options for axios
@@ -107,8 +111,10 @@ module.exports = {
     let result;
     try {
       result = await axios(options);
+      console.log(result.data)
       return res.status(200).json(result.data);
     } catch (error) {
+      console.log(error)
       return res.status(500).json({ statusCode: 500, message: error.message });
     }
   },
