@@ -42,6 +42,10 @@ const ProductDetails = ({ data }) => {
 
   const addToCartHandler = async (id) => {
     const isItemExists = cart && cart.find((i) => i.product == id);
+    if (!user) {
+      toast.error("Please login to add cart");
+      return
+    }
     if (isItemExists) {
       toast.error("Item already in cart!");
     } else {
