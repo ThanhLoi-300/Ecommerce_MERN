@@ -1,6 +1,6 @@
 import { React, useState } from "react";
 import styles from "../../styles/styles";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
@@ -11,6 +11,7 @@ const Singup = () => {
     email: '', password: '', name: ''
   }
   const [info, setInfo] = useState(input);
+  const navigate = useNavigate()
   
   const handleOnChange = (e) => {
     setInfo({ ...info, [e.target.name]: e.target.value })
@@ -21,7 +22,8 @@ const Singup = () => {
 
     axios.post(`${server}/user/create-user`, { ...info })
       .then((res) => {
-        toast.success(res.data.message);
+        toast.success("Account is created");
+        navigate("/")
         setInfo(input)
       })
       .catch((error) => {

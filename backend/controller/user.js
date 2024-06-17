@@ -21,29 +21,43 @@ module.exports = {
         return next(new ErrorHandler("User already exists", 400));
       }
 
-      const user = {
-        name: name,
-        email: email,
-        password: password,
-      };
+      // const user = {
+      //   name: name,
+      //   email: email,
+      //   password: password,
+      // };
 
-      const activationToken = createActivationToken(user);
-      
-      const activationUrl = `https://ecommerce-mern-frontend-fv9k.onrender.com/activation/${activationToken}`;
+      let user = await User.findOne({ email });
 
-      try {
-        await sendMail({
-          email: user.email,
-          subject: "Activate your account",
-          message: `Hello ${user.name}, please click on the link to activate your account: ${activationUrl}`,
-        });
-        res.status(201).json({
-          success: true,
-          message: `please check your email:- ${user.email} to activate your account!`,
-        });
-      } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      if (user) {
+        return next(new ErrorHandler("User already exists", 400));
       }
+
+      user = await User.create({
+        name,
+        email,
+        password,
+      });
+
+      sendToken(user, 201, res);
+
+      // const activationToken = createActivationToken(user);
+      
+      // const activationUrl = `https://ecommerce-mern-frontend-fv9k.onrender.com/activation/${activationToken}`;
+
+      // try {
+        // await sendMail({
+        //   email: user.email,
+        //   subject: "Activate your account",
+        //   message: `Hello ${user.name}, please click on the link to activate your account: ${activationUrl}`,
+        // });
+        // res.status(201).json({
+        //   success: true,
+        //   message: `please check your email:- ${user.email} to activate your account!`,
+        // });
+      // } catch (error) {
+      //   return next(new ErrorHandler(error.message, 500));
+      // }
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
