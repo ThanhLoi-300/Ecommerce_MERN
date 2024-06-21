@@ -53,7 +53,9 @@ const Login = () => {
           window.location.reload(true); 
         })
       }).catch((error) => {
-        dispatch(loginFailure())
+        console.log(error)
+        toast.error("Account is wrong");
+        // dispatch(loginFailure())
       })
   };
 
