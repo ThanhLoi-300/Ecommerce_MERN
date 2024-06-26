@@ -26,11 +26,11 @@ module.exports = {
       await user.save()
 
       try {
-        await sendMail({
-          email: req.body.email,
-          subject: "Creating your Shop",
-          message: `Hello ${req.body.nameShop}, Your Shop is created successfully`,
-        });
+        // await sendMail({
+        //   email: req.body.email,
+        //   subject: "Creating your Shop",
+        //   message: `Hello ${req.body.nameShop}, Your Shop is created successfully`,
+        // });
         res.status(201).json({
           success: true,
           message: `Your Shop is created successfully`,
