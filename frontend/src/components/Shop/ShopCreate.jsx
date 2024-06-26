@@ -14,9 +14,9 @@ const ShopCreate = () => {
   const { user } = useSelector((state) => state.user);
   const input = {
     email: user.email, nameShop: user.name, phoneNumber: user.phoneNumber,
-    address: user.address, zipCode: null, idUser: user._id
+    address: user.address, idUser: user._id
   }
-  
+  console.log(user._id)
   const [info, setInfo] = useState(input);
 
   const handleOnChange = (e) => {
@@ -62,11 +62,6 @@ const ShopCreate = () => {
             />
 
             <Input label="Address" value={info.address} name="address" type="text" placeholder="Address" onChange={handleOnChange} 
-              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              styleLabel="block text-sm font-medium text-gray-700"
-            />
-
-            <Input label="Zip Code" value={info.zipCode} name="zipCode" type="number" placeholder="Zip Code" onChange={handleOnChange} 
               className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               styleLabel="block text-sm font-medium text-gray-700"
             />

@@ -18,8 +18,8 @@ module.exports = {
       const seller = await Shop.create({
         nameShop: req.body.nameShop,
         address: req.body.address,
-        zipCode: req.body.zipCode,
-        idUser: req.body.idUser
+        //zipCode: req.body.zipCode,
+        user: req.body.idUser
       });
 
       user.phoneNumber = req.body.phoneNumber

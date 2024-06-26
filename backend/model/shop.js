@@ -6,7 +6,7 @@ const shopSchema = new mongoose.Schema({
   nameShop: { type: String,},
   description: { type: String,},
   address: { type: String, },
-  zipCode: { type: Number, required: true,},
+  // zipCode: { type: Number, required: true,},
   withdrawMethod: { type: Object,},
   availableBalance: { type: Number, default: 0,},
   transections: [
