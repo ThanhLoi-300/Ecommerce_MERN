@@ -1,13 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../../styles/styles";
+import { toast } from "react-toastify";
 
 const DropDown = ({ categoriesData, setDropDown }) => {
   const navigate = useNavigate();
   const submitHandle = (i) => {
-    navigate(`/products?category=${i.title}`);
+    toast.warning("Comming Soon");
+    // navigate(`/products?category=${i.title}`);
     setDropDown(false);
-    window.location.reload();
+    // window.location.reload();
   };
   return (
     <div className="pb-4 w-[270px] bg-[#fff] absolute z-30 rounded-b-md shadow-sm">
