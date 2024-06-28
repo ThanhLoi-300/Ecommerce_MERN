@@ -16,8 +16,8 @@ const DashboardHero = () => {
   const { products } = useSelector((state) => state.products);
 
   useEffect(() => {
-     dispatch(getAllOrdersOfShop(seller._id));
-     dispatch(getAllProductsShop(seller._id));
+     dispatch(getAllOrdersOfShop(seller?._id));
+     dispatch(getAllProductsShop(seller?._id));
   }, [dispatch]);
 
   const availableBalance = seller?.availableBalance.toLocaleString();
@@ -46,7 +46,7 @@ const DashboardHero = () => {
               All Orders
             </h3>
           </div>
-          <h5 className="pt-2 pl-[36px] text-[22px] font-[500]">{orders && orders.length}</h5>
+          <h5 className="pt-2 pl-[36px] text-[22px] font-[500]">{orders?.length}</h5>
           <Link to="/dashboard-orders">
             <h5 className="pt-4 pl-2 text-[#077f9c]">View Orders</h5>
           </Link>
@@ -59,7 +59,7 @@ const DashboardHero = () => {
               All Products
             </h3>
           </div>
-          <h5 className="pt-2 pl-[36px] text-[22px] font-[500]">{products && products.length}</h5>
+          <h5 className="pt-2 pl-[36px] text-[22px] font-[500]">{products?.length}</h5>
           <Link to="/dashboard-products">
             <h5 className="pt-4 pl-2 text-[#077f9c]">View Products</h5>
           </Link>

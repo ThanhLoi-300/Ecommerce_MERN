@@ -43,53 +43,55 @@ const ProductsPage = () => {
   };
 
   useEffect(() => {
-    let filteredProducts = allProducts;
+    if (allProducts) {
+      let filteredProducts = allProducts;
 
-    if (filter.search) {
-      // Lọc theo từ khóa tìm kiếm
-      filteredProducts = filteredProducts.filter((product) =>
-        product.name.toLowerCase().includes(filter.search.toLowerCase())
+      if (filter.search) {
+        // Lọc theo từ khóa tìm kiếm
+        filteredProducts = filteredProducts.filter((product) =>
+          product.name.toLowerCase().includes(filter.search.toLowerCase())
+        );
+      }
+
+      if (filter.category.length > 0) {
+        // Lọc theo danh mục
+        filteredProducts = filteredProducts.filter((product) =>
+          filter.category.includes(product.category)
+        );
+      }
+
+      if (filter.min > 0) {
+        // Lọc theo giá tối thiểu
+        filteredProducts = filteredProducts.filter(
+          (product) => product.originalPrice >= parseInt(filter.min)
+        );
+      }
+
+      if (filter.max > 0) {
+        // Lọc theo giá tối thiểu
+        filteredProducts = filteredProducts.filter(
+          (product) => product.originalPrice <= parseInt(filter.max)
+        );
+      }
+
+      let list = [...filteredProducts];
+
+      if (filter.sort === "asc") {
+        // Sắp xếp giá tăng dần
+        list.sort((a, b) => a.originalPrice - b.originalPrice);
+      } else if (filter.sort === "desc") {
+        // Sắp xếp giá giảm dần
+        list.sort((a, b) => b.originalPrice - a.originalPrice);
+      }
+
+      setTotalList(list);
+      setData(
+        list?.slice(
+          (currentPage - 1) * productsPerPage,
+          currentPage * productsPerPage
+        )
       );
     }
-
-    if (filter.category.length > 0) {
-      // Lọc theo danh mục
-      filteredProducts = filteredProducts.filter((product) =>
-        filter.category.includes(product.category)
-      );
-    }
-
-    if (filter.min > 0) {
-      // Lọc theo giá tối thiểu
-      filteredProducts = filteredProducts.filter(
-        (product) => product.originalPrice >= parseInt(filter.min)
-      );
-    }
-
-    if (filter.max > 0) {
-      // Lọc theo giá tối thiểu
-      filteredProducts = filteredProducts.filter(
-        (product) => product.originalPrice <= parseInt(filter.max)
-      );
-    }
-
-    let list = [...filteredProducts];
-
-    if (filter.sort === "asc") {
-      // Sắp xếp giá tăng dần
-      list.sort((a, b) => a.originalPrice - b.originalPrice);
-    } else if (filter.sort === "desc") {
-      // Sắp xếp giá giảm dần
-      list.sort((a, b) => b.originalPrice - a.originalPrice);
-    }
-
-    setTotalList(list);
-    setData(
-      list?.slice(
-        (currentPage - 1) * productsPerPage,
-        currentPage * productsPerPage
-      )
-    );
   }, [filter, allProducts, currentPage]);
 
   return (
@@ -169,14 +171,14 @@ const ProductsPage = () => {
             <div className={`${styles.section}`}>
               <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-4 lg:gap-[25px] xl:grid-cols-5 xl:gap-[30px] ml-4 mb-12">
                 {data &&
-                  data.map((i, index) => <ProductCard data={i} key={index} />)}
+                  data?.map((i, index) => <ProductCard data={i} key={index} />)}
               </div>
               {data && data.length === 0 && (
                 <h1 className="text-center w-full pb-[100px] text-[20px]">
                   No products Found!
                 </h1>
               )}
-              {data && data.length !== 0 && (
+              {data && data?.length !== 0 && (
                 <PaginationButtons
                   totalPages={Math.ceil(totalList?.length / productsPerPage)}
                   currentPage={currentPage}
