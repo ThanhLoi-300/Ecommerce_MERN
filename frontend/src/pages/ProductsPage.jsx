@@ -103,7 +103,7 @@ const ProductsPage = () => {
           <Header activeHeading={3} />
           <br />
           <div className="flex row">
-            <div className="ml-14 w-[24%] bg-white rounded-3xl mb-12">
+            <div className="800px:ml-10 800px:w-[30%] 1100px:ml-14 1100px:w-[24%] bg-white rounded-3xl mb-12 375px:ml-2 375px:w-[45%]">
               <div className="p-4 border-b-2 border-gray-300">
                 <h4 className="font-[500] text-[20px]">Search</h4>
                 <input
@@ -168,7 +168,7 @@ const ProductsPage = () => {
                 </div>
               </div>
             </div>
-            <div className={`${styles.section}`}>
+            <div className={`375px:w-6/12 800px:w-10/12 1100px:w-11/12 mx-auto`}>
               <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-4 lg:gap-[25px] xl:grid-cols-5 xl:gap-[30px] ml-4 mb-12">
                 {data &&
                   data?.map((i, index) => <ProductCard data={i} key={index} />)}
