@@ -5,13 +5,17 @@ import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
 import Input from "../Inputs/Input";
+import ConfirmOTP from "./ConfirmOTP";
 
 const Singup = () => {
   const input = {
     email: '', password: '', name: ''
   }
+
+  const [otp, setOTP] = useState("")
+
   const [info, setInfo] = useState(input);
-  const navigate = useNavigate()
+  const [modalOTP, setModalOTP] = useState(false);
   
   const handleOnChange = (e) => {
     setInfo({ ...info, [e.target.name]: e.target.value })
@@ -22,13 +26,14 @@ const Singup = () => {
 
     axios.post(`${server}/user/create-user`, { ...info })
       .then((res) => {
-        toast.success("Account is created");
-        navigate("/")
-        setInfo(input)
+        if (res.data.success) {
+          toast.success(res.data.message);
+          setOTP(res.data.data)
+          setModalOTP(true)
+        } else {
+          toast.error(res.data.message)
+        }
       })
-      .catch((error) => {
-        toast.error(error.response.data.message);
-      });
   };
 
   return (
@@ -77,6 +82,7 @@ const Singup = () => {
           </form>
         </div>
       </div>
+      {modalOTP && <ConfirmOTP otp={otp} setModalOTP={setModalOTP} info={ info} />}
     </div>
   );
 };

@@ -1,80 +1,46 @@
 const express = require("express");
 const User = require("../model/user");
-const Shop = require("../model/shop");
-const Product = require("../model/product");
-const router = express.Router();
-const cloudinary = require("cloudinary");
 const ErrorHandler = require("../utils/ErrorHandler");
-const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
 const sendToken = require("../utils/jwtToken");
-const { isAuthenticated } = require("../middleware/auth");
 
 module.exports = {
   createUser: async (req, res, next) => {
     try {
-      const { name, email, password } = req.body;
+      const { name, email } = req.body;
       const userEmail = await User.findOne({ email });
 
       if (userEmail) {
-        return next(new ErrorHandler("User already exists", 400));
+        return res.status(200).json({
+          success: false,
+          message: `This email is used`,
+        });
       }
 
-      // const user = {
-      //   name: name,
-      //   email: email,
-      //   password: password,
-      // };
-
-      let user = await User.findOne({ email });
-
-      if (user) {
-        return next(new ErrorHandler("User already exists", 400));
-      }
-
-      user = await User.create({
-        name,
-        email,
-        password,
+      const otp = Math.floor(Math.random() * 9000) + 1000;
+      await sendMail({
+        email: email,
+        subject: "Register account",
+        message: `Hello ${name} \nYour OTP is: ` + otp,
       });
 
-      sendToken(user, 201, res);
-
-      // const activationToken = createActivationToken(user);
-      
-      // const activationUrl = `https://ecommerce-mern-frontend-fv9k.onrender.com/activation/${activationToken}`;
-
-      // try {
-        // await sendMail({
-        //   email: user.email,
-        //   subject: "Activate your account",
-        //   message: `Hello ${user.name}, please click on the link to activate your account: ${activationUrl}`,
-        // });
-        // res.status(201).json({
-        //   success: true,
-        //   message: `please check your email:- ${user.email} to activate your account!`,
-        // });
-      // } catch (error) {
-      //   return next(new ErrorHandler(error.message, 500));
-      // }
+      res.status(201).json({
+        success: true,
+        message: `Please check your email:- ${email} to recieve OTP!`,
+        data: otp,
+      });
     } catch (error) {
-      return next(new ErrorHandler(error.message, 400));
+      return res.status(200).json({
+        success: false,
+        message: error.message,
+      });
     }
   },
 
   activationUser: async (req, res, next) => {
     try {
-      const { activation_token } = req.body;
-      const newUser = jwt.verify(
-        activation_token,
-        process.env.ACTIVATION_SECRET
-      );
-
-      if (!newUser) {
-        return next(new ErrorHandler("Invalid token", 400));
-      }
-      const { name, email, password } = newUser;
+      const { name, email, password } = req.body;
 
       let user = await User.findOne({ email });
 
@@ -88,7 +54,10 @@ module.exports = {
         password,
       });
 
-      sendToken(user, 201, res);
+      res.status(201).json({
+        success: true,
+        message: `Account is created successfully`,
+      });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
@@ -97,7 +66,7 @@ module.exports = {
   loginUser: async (req, res, next) => {
     try {
       const { email, password } = req.body;
-      console.log(JSON.stringify(req.body));
+
       const user = await User.findOne({ email: email }).select("+password");
 
       if (!user) return next(new ErrorHandler("User doesn't exists!", 400));
