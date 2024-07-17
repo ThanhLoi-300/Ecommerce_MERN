@@ -94,7 +94,7 @@ module.exports = {
         });
 
         const savedUser = await newUser.save();
-        sendToken(user, 201, res);
+        sendToken(savedUser, 201, res);
       }
     } catch (err) {
       next(err);
